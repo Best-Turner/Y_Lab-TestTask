@@ -2,6 +2,7 @@ package ru.ylab.repository;
 
 import ru.ylab.model.User;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -33,5 +34,8 @@ public class UserRepository {
 
     public boolean isExist(String email) {
         return users.containsKey(email);
+    }
+    public List<User> userList() {
+        return (List)users.values();
     }
 }

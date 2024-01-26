@@ -8,6 +8,17 @@ public class WaterCounter {
     private Float currentValue;
     private User owner;
 
+    public WaterCounter() {
+    }
+
+    public WaterCounter(Long id, String serialNumber, CounterType type, Float currentValue, User owner) {
+        this.id = id;
+        this.serialNumber = serialNumber;
+        this.type = type;
+        this.currentValue = currentValue;
+        this.owner = owner;
+    }
+
     public Long getId() {
         return id;
     }
@@ -48,11 +59,5 @@ public class WaterCounter {
         this.owner = owner;
     }
 
-    public WaterCounter(Long id, String serialNumber, CounterType type, Float currentValue, User owner) {
-        this.id = id;
-        this.serialNumber = serialNumber;
-        this.type = type;
-        this.currentValue = currentValue;
-        this.owner = owner;
-    }
+
 }

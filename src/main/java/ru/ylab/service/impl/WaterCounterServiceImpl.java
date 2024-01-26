@@ -1,8 +1,9 @@
-package ru.ylab.service;
+package ru.ylab.service.impl;
 
 import ru.ylab.exception.WaterCounterNotFoundException;
 import ru.ylab.model.WaterCounter;
 import ru.ylab.repository.WaterCounterRepository;
+import ru.ylab.service.WaterCounterService;
 
 import java.util.List;
 import java.util.Optional;
