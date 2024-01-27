@@ -1,5 +1,7 @@
 package ru.ylab.model;
 
+import java.util.Objects;
+
 public class WaterCounter {
 
     private Long id;
@@ -59,5 +61,16 @@ public class WaterCounter {
         this.owner = owner;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        WaterCounter that = (WaterCounter) o;
+        return Objects.equals(serialNumber, that.serialNumber);
+    }
 
+    @Override
+    public int hashCode() {
+        return Objects.hash(serialNumber);
+    }
 }
