@@ -2,10 +2,7 @@ package ru.ylab.repository;
 
 import ru.ylab.model.WaterCounter;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 public class WaterCounterRepository {
 
@@ -40,7 +37,7 @@ public class WaterCounterRepository {
         return waterCounters.containsKey(serialNumber);
     }
 
-    public List<WaterCounter> getAllWaterCounters() {
-        return List.of((WaterCounter) waterCounters.entrySet());
+    public Map<String, WaterCounter> getAllWaterCounters() {
+        return waterCounters;
     }
 }

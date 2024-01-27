@@ -34,4 +34,8 @@ public class CounterDataStorageRepository {
     public Map<String, Float> getValues(String serialNumber) {
         return dataStorage.getDataStorage().get(serialNumber);
     }
+
+    public void delete(String serialNumber) {
+        dataStorage.getDataStorage().remove(serialNumber);
+    }
 }

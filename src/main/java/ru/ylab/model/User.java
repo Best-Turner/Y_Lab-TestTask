@@ -1,6 +1,6 @@
 package ru.ylab.model;
 
-import java.util.List;
+import java.util.Set;
 
 public class User {
 
@@ -9,7 +9,7 @@ public class User {
     private String email;
     private String password;
     private Role role;
-    private List<WaterCounter> waterCounterList;
+    private Set<WaterCounter> waterCounterList;
 
     public User() {
     }
@@ -54,11 +54,11 @@ public class User {
         this.password = password;
     }
 
-    public List<WaterCounter> getWaterCounterList() {
+    public Set<WaterCounter> getWaterCounterList() {
         return waterCounterList;
     }
 
-    public void setWaterCounterList(List<WaterCounter> waterCounterList) {
+    public void setWaterCounters(Set<WaterCounter> waterCounterList) {
         this.waterCounterList = waterCounterList;
     }
 

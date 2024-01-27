@@ -13,6 +13,8 @@ public interface CounterDataStorageService {
 
     Map<String, Float> getValues(String serialNumber);
 
-    boolean isExist(String serialNumber);
+    boolean isRegistrInStorage(String serialNumber);
+
+    void delete(String serialNumber);
 
 }

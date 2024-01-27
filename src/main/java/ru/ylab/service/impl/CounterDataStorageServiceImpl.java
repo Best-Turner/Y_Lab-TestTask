@@ -1,5 +1,6 @@
 package ru.ylab.service.impl;
 
+import ru.ylab.exception.InvalidDataException;
 import ru.ylab.repository.CounterDataStorageRepository;
 import ru.ylab.service.CounterDataStorageService;
 
@@ -23,17 +24,30 @@ public class CounterDataStorageServiceImpl implements CounterDataStorageService 
 
     @Override
     public boolean submitValue(String serialNumber, Float value) {
-        if (!isExist(serialNumber)) {
+        if (!isRegistrInStorage(serialNumber)) {
             return false;
         }
-        repository.addValue(serialNumber, getKeyFromDate(now()), value);
+        Float currentValue = getCurrentValue(serialNumber);
+        if (currentValue == null) {
+            currentValue = 0f;
+        }
+        if (value < currentValue) {
+            try {
+                throw new InvalidDataException("Invalid data. Transmitted value cannot be less than the current one");
+            } catch (InvalidDataException e) {
+                System.out.println("Check your details and try again");
+                return false;
+            }
+        }
+        currentValue = value;
+        repository.addValue(serialNumber, getKeyFromDate(now()), currentValue);
         return true;
     }
 
     @Override
     public Float getCurrentValue(String serialNumber) {
         Float value;
-        if (!isExist(serialNumber)) {
+        if (!isRegistrInStorage(serialNumber)) {
             return null;
         }
         value = repository.getValue(serialNumber, getKeyFromDate(now()));
@@ -46,7 +60,7 @@ public class CounterDataStorageServiceImpl implements CounterDataStorageService 
 
     @Override
     public Float getValueByDate(String serialNumber, String date) {  // date - "yyyy - M"
-        if (!isExist(serialNumber)) {
+        if (!isRegistrInStorage(serialNumber)) {
             return null;
         }
         return repository.getValue(serialNumber, date);  // return -1f else value empty
@@ -54,15 +68,20 @@ public class CounterDataStorageServiceImpl implements CounterDataStorageService 
 
     @Override
     public Map<String, Float> getValues(String serialNumber) {
-        if (!isExist(serialNumber)) {
+        if (!isRegistrInStorage(serialNumber)) {
             return null;
         }
         return repository.getValues(serialNumber);
     }
 
     @Override
-    public boolean isExist(String serialNumber) {
+    public boolean isRegistrInStorage(String serialNumber) {
         return repository.isExist(serialNumber);
+    }
+
+    @Override
+    public void delete(String serialNumber) {
+        repository.delete(serialNumber);
     }
 
     private String getKeyFromDate(LocalDate date) {
