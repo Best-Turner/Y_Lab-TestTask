@@ -1,12 +1,14 @@
 package ru.ylab.util.impl;
 
 import ru.ylab.exception.InvalidDataException;
+import ru.ylab.exception.WaterCounterNotFoundException;
 import ru.ylab.model.CounterType;
 import ru.ylab.model.User;
 import ru.ylab.model.WaterCounter;
 import ru.ylab.service.WaterCounterService;
 import ru.ylab.util.WaterCounterValidator;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -19,9 +21,8 @@ public class WaterCounterValidatorImpl implements WaterCounterValidator {
             "C - cold;\n" +
             "O - heating;\n" +
             "XXXX - serial number";
-
-    private static Long count;
     private final static String MESSAGE_WRONG_SERIAL_NUMBER = "Invalid serial number format.\n" + PATTERN_SERIAL_NUMBER;
+    private static Long count = 1L;
     private final WaterCounterService service;
 
     public WaterCounterValidatorImpl(WaterCounterService service) {
@@ -37,7 +38,9 @@ public class WaterCounterValidatorImpl implements WaterCounterValidator {
         if (value == null) {
             value = 0f;
         }
-        service.save(new WaterCounter(++count, serialNumber, counterType, value, owner));
+        WaterCounter newWaterCounter = new WaterCounter(++count, serialNumber, counterType, value, owner);
+        service.save(newWaterCounter);
+        owner.getWaterCounterList().add(newWaterCounter);
         return true;
     }
 
@@ -50,11 +53,20 @@ public class WaterCounterValidatorImpl implements WaterCounterValidator {
     }
 
     @Override
+    public Map<String, Float> getHistoryValues(String serialNumber) {
+        return service.getValues(serialNumber);
+    }
+
+    @Override
     public boolean transferData(String serialNumber, Float value) {
         if (!validateSerialNumber(serialNumber)) {
             return false;
         }
-        service.transferData(serialNumber, value);
+        try {
+            service.transferData(serialNumber, value);
+        } catch (InvalidDataException e) {
+            System.out.println(e.getMessage());
+        }
         return true;
     }
 
@@ -71,7 +83,12 @@ public class WaterCounterValidatorImpl implements WaterCounterValidator {
         if (validateSerialNumber(serialNumber)) {
             return null;
         }
-        return service.getWaterCounter(serialNumber);
+        try {
+            return service.getWaterCounter(serialNumber);
+        } catch (WaterCounterNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 
     @Override

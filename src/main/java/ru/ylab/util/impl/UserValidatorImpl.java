@@ -1,5 +1,6 @@
 package ru.ylab.util.impl;
 
+import ru.ylab.exception.UserNotFoundException;
 import ru.ylab.model.Role;
 import ru.ylab.model.User;
 import ru.ylab.model.WaterCounter;
@@ -8,7 +9,6 @@ import ru.ylab.util.UserValidator;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 
 public class UserValidatorImpl implements UserValidator {
 
@@ -26,10 +26,6 @@ public class UserValidatorImpl implements UserValidator {
         if (!validate(inputEmail, inputPassword)) {
             return false;
         }
-        if (isUnique(inputEmail)) {
-            System.out.println("This email already is registered");
-            return false;
-        }
         if (inputName == null || inputName.isBlank()) {
             inputName = "<Anonymous>";
         }
@@ -45,12 +41,22 @@ public class UserValidatorImpl implements UserValidator {
         if (!validatePassword(password)) {
             return false;
         }
-        return userService.checkUserCredentials(userByEmail, password);
+        try {
+            return userService.checkUserCredentials(userByEmail, password);
+        } catch (UserNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
+        return false;
     }
 
     @Override
     public boolean isUnique(String email) {
-        return !userService.isExist(email);
+        boolean exist = userService.isExist(email);
+        if (exist) {
+            System.out.println("This email already is registered");
+            return true;
+        }
+        return !validateEmail(email);
     }
 
     @Override
@@ -95,7 +101,12 @@ public class UserValidatorImpl implements UserValidator {
             System.out.println("Incorrect entered email");
             return null;
         }
-        return userService.getUser(email);
+        try {
+            return userService.getUser(email);
+        } catch (UserNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
+        return null;
     }
 
 
@@ -107,6 +118,7 @@ public class UserValidatorImpl implements UserValidator {
         }
         return users;
     }
+
     @Override
     public boolean isAdmin(User user) {
         return user.getRole().equals(Role.ADMIN);
@@ -118,7 +130,7 @@ public class UserValidatorImpl implements UserValidator {
     }
 
     @Override
-    public Set<WaterCounter> getWaterCounters(User owner) {
+    public List<WaterCounter> getWaterCounters(User owner) {
         return userService.waterCounters(owner);
     }
 

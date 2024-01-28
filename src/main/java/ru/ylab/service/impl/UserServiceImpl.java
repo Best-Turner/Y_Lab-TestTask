@@ -26,19 +26,23 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUser(String email) {
-        try {
-            return repository.getUser(email).orElseThrow(() ->
-                    new UserNotFoundException("User with this" + email + " is not registered"));
-        } catch (UserNotFoundException e) {
-            System.out.println(e.getMessage());
-        }
-        return null;
+    public User getUser(String email) throws UserNotFoundException {
+        return repository.getUser(email).orElseThrow(() ->
+                new UserNotFoundException("User with this" + email + " is not registered"));
     }
 
     @Override
     public List<User> allUsers() {
-        return repository.userList();
+        Map<String, User> userMap = repository.userList();
+        if (!userMap.isEmpty()) {
+            List<User> users = new ArrayList<>();
+
+            for (Map.Entry<String, User> entry : userMap.entrySet()) {
+                users.add(entry.getValue());
+            }
+            return users;
+        }
+        return Collections.emptyList();
     }
 
     @Override
@@ -59,16 +63,13 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean checkUserCredentials(User userByEmail, String password) {
+    public boolean checkUserCredentials(User userByEmail, String inputPassword) throws UserNotFoundException {
         boolean isAuthentication = false;
         if (userByEmail == null) {
-            try {
-                throw new UserNotFoundException("You haven't registered yet");
-            } catch (UserNotFoundException e) {
-                System.out.println(e.getMessage());
-            }
+            throw new UserNotFoundException("You haven't registered yet");
+
         } else {
-            if (userByEmail.getPassword().equals(password)) {
+            if (userByEmail.getPassword().equals(inputPassword)) {
                 isAuthentication = true;
             }
         }
@@ -76,9 +77,12 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Set<WaterCounter> waterCounters(User owner) {
+    public List<WaterCounter> waterCounters(User owner) {
+        List<WaterCounter> list = new ArrayList<>();
         String email = owner.getEmail();
-        return repository.getWaterCounters(email);
+        Set<WaterCounter> waterCounters = repository.getWaterCounters(email);
+        waterCounters.forEach(list::add);
+        return list;
     }
 
     @Override

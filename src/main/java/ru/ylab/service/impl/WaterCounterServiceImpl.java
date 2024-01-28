@@ -1,5 +1,6 @@
 package ru.ylab.service.impl;
 
+import ru.ylab.exception.InvalidDataException;
 import ru.ylab.exception.WaterCounterNotFoundException;
 import ru.ylab.model.WaterCounter;
 import ru.ylab.repository.WaterCounterRepository;
@@ -29,15 +30,11 @@ public class WaterCounterServiceImpl implements WaterCounterService {
     }
 
     @Override
-    public WaterCounter getWaterCounter(String serialNumber) {
+    public WaterCounter getWaterCounter(String serialNumber) throws WaterCounterNotFoundException {
 
         Optional<WaterCounter> waterCounter = repository.getWaterCounter(serialNumber);
         if (!waterCounter.isPresent()) {
-            try {
-                throw new WaterCounterNotFoundException("WaterCounter with this serial number = " + serialNumber + " not found");
-            } catch (WaterCounterNotFoundException e) {
-                System.out.println(e.getMessage());
-            }
+            throw new WaterCounterNotFoundException("WaterCounter with this serial number = " + serialNumber + " not found");
         }
         return waterCounter.get();
 
@@ -45,11 +42,19 @@ public class WaterCounterServiceImpl implements WaterCounterService {
 
     @Override
     public Set<WaterCounter> allWaterCounter() {
-        return (Set<WaterCounter>) repository.getAllWaterCounters().values();
+        Set<WaterCounter> waterCounters = new HashSet<>();
+        Map<String, WaterCounter> allWaterCounters = repository.getAllWaterCounters();
+        if (!allWaterCounters.isEmpty()) {
+            for (Map.Entry<String, WaterCounter> entry : allWaterCounters.entrySet()) {
+                waterCounters.add(entry.getValue());
+            }
+            return waterCounters;
+        }
+        return Collections.emptySet();
     }
 
     @Override
-    public void changeCurrentValue(String serialNumber, Float newValue) {
+    public void transferData(String serialNumber, Float newValue) throws InvalidDataException {
         storageService.submitValue(serialNumber, newValue);
     }
 
@@ -60,7 +65,7 @@ public class WaterCounterServiceImpl implements WaterCounterService {
         }
         storageService.delete(serialNumber);
         repository.delete(serialNumber);
-        return false;
+        return true;
     }
 
     @Override
@@ -68,19 +73,15 @@ public class WaterCounterServiceImpl implements WaterCounterService {
         return storageService.getCurrentValue(serialNumber);
     }
 
-    @Override
-    public void transferData(String serialNumber, Float value) {
-        storageService.submitValue(serialNumber, value);
-    }
-
-    @Override
-    public Map<String, Float> values(String serialNumber) {
-        return storageService.getValues(serialNumber);
-    }
 
     @Override
     public Float getValueByDate(String serialNumber, String date) {
         return storageService.getValueByDate(serialNumber, date);
+    }
+
+    @Override
+    public Map<String, Float> getValues(String serialNumber) {
+        return storageService.getValues(serialNumber);
     }
 
     public boolean delete(WaterCounter waterCounter) {
