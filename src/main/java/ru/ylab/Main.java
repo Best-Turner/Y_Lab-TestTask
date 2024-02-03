@@ -34,10 +34,10 @@ public class Main {
         Map<String, User> userMap = new HashMap<>();
 
         User admin = new User(1L, "Admin", "admin@mail.ru", "1234", Role.ADMIN);
-        User user = new User(1L, "User", "user@mail.ru", "1234", Role.USER);
+        User user = new User(2L, "User", "user@mail.ru", "1234", Role.USER);
 
         WaterCounter counter1 = new WaterCounter(1L, "H-1234", CounterType.HOT, 123f, admin);
-        WaterCounter counter2 = new WaterCounter(2L, "C-4321", CounterType.HOT, 321f, user);
+        WaterCounter counter2 = new WaterCounter(2L, "C-4321", CounterType.COLD, 321f, user);
         admin.setWaterCounters(new HashSet<>());
         user.setWaterCounters(new HashSet<>());
         admin.getWaterCounterList().add(counter1);

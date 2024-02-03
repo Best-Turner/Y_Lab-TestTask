@@ -1,5 +1,6 @@
 package ru.ylab.app.in;
 
+import org.jetbrains.annotations.NotNull;
 import ru.ylab.model.Role;
 import ru.ylab.model.User;
 import ru.ylab.model.WaterCounter;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 public class ConsoleServiceMediator {
+    private static final String COMMAND_ZERO = "0";
     private static final String COMMAND_ONE = "1";
     private static final String COMMAND_TWO = "2";
     private static final String COMMAND_THREE = "3";
@@ -48,29 +50,29 @@ public class ConsoleServiceMediator {
         this.scanner = new Scanner(System.in);
     }
 
-    private void startPage() {
+    private void messageForStartPage() {
         AuditLogger.log("Start program");
         System.out.println(COMMAND_ONE + REGISTRATION);
         System.out.println(COMMAND_TWO + AUTHENTICATE);
     }
 
-    private void mainMenu() {
+    private void printMainMenuForUser() {
         AuditLogger.log("User has entered the main menu");
         System.out.println(COMMAND_ONE + REGISTER_COUNTER);
         System.out.println(COMMAND_TWO + COUNTERS);
-        System.out.println(COMMAND_THREE + SETTINGS);
     }
 
 
-    private void mainMenuForAdmin() {
+    private void printMainMenuForAdmin() {
         AuditLogger.log("Admin has entered the main menu");
-        mainMenu();
-        System.out.println(COMMAND_FOUR + USER);
-        System.out.println(COMMAND_FIVE + USERS);
+        printMainMenuForUser();
+        System.out.println(COMMAND_THREE + USERS);
+        System.out.println(COMMAND_ZERO + " - to exit");
+
     }
 
     public User processStartPageCommand() {
-        startPage();
+        messageForStartPage();
         User registeredUser = null;
         String command = readUserCommand();
         switch (command) {
@@ -97,83 +99,71 @@ public class ConsoleServiceMediator {
             }
         }
         return registeredUser;
-
     }
 
     public void pageForRegisteredUser(User owner) {
+        boolean flag = true;
+        while (flag) {
+            if (owner.getRole().equals(Role.ADMIN)) {
+                printMainMenuForAdmin();
+                String command = readUserCommand();
+                switch (command) {
+                    case COMMAND_ONE -> {
+                        AuditLogger.log("Admin" + owner.getEmail() + " entered command - 1");
+                        registerCounter(owner);
+                    }
 
-        if (owner.getRole().equals(Role.ADMIN)) {
-            mainMenuForAdmin();
-            System.out.println("Enter " + EXIT + " to exit");
+                    case COMMAND_TWO -> {
+                        AuditLogger.log("Admin" + owner.getEmail() + " entered command - 2");
+                        getListWaterCounters(owner);
+                        waterCounterMenu(userValidator.getWaterCounters(owner));
+                    }
+                    case COMMAND_THREE -> {
+                        AuditLogger.log("Admin" + owner.getEmail() + " entered command - 5");
+                        getUsers();
+                    }
+                    case COMMAND_ZERO -> {
+                        AuditLogger.log("Admin " + owner.getEmail() + " entered command - 0");
+                        flag = false;
+                    }
+                    default -> {
+                        AuditLogger.log("Admin "
+                                + owner.getEmail() +
+                                " entered command - "
+                                + WRONG_COMMAND + " - " + command);
+                        System.out.println(WRONG_COMMAND);
+                    }
+                }
+            } else {
+                AuditLogger.log("User has entered the main menu");
+                printMainMenuForUser();
+                System.out.println("Enter " + EXIT + " to exit");
+                String command = readUserCommand();
+                switch (command) {
+                    case COMMAND_ONE -> {
+                        AuditLogger.log("User " + owner.getEmail() + " entered command - 1");
+                        registerCounter(owner);
+                    }
 
-            String command = readUserCommand();
-            switch (command) {
-                case COMMAND_ONE -> {
-                    AuditLogger.log("Admin" + owner.getEmail() + " entered command - 1");
-                    registerCounter(owner);
-                }
-
-                case "2" -> {
-                    AuditLogger.log("Admin" + owner.getEmail() + " entered command - 2");
-                    getListCounters(owner);
-                }
-
-                case "3" -> {
-                    AuditLogger.log("Admin" + owner.getEmail() + " entered command - 3");
-                    settingsMenu(owner);
-                }
-
-                case "4" -> {
-                    AuditLogger.log("Admin" + owner.getEmail() + " entered command - 4");
-                    getUserByEmail();
-                }
-                case "5" -> {
-                    AuditLogger.log("Admin" + owner.getEmail() + " entered command - 5");
-                    getUsers();
-                }
-                case "0" -> {
-                    AuditLogger.log("Admin " + owner.getEmail() + " entered command - 0");
-                    break;
-                }
-                default -> {
-                    AuditLogger.log("Admin "
-                            + owner.getEmail() +
-                            " entered command - "
-                            + WRONG_COMMAND + " - " + command);
-                    System.out.println(WRONG_COMMAND);
+                    case COMMAND_TWO -> {
+                        AuditLogger.log("User " + owner.getEmail() + " entered command - 2");
+                        getListWaterCounters(owner);
+                    }
+//
+//                    case COMMAND_THREE -> {
+//                        AuditLogger.log("User " + owner.getEmail() + " entered command - 3");
+//                        settingsMenu(owner);
+//                    }
+                    case "0" -> {
+                        AuditLogger.log("User " + owner.getEmail() + " entered command - 0");
+                        break;
+                    }
+                    default -> {
+                        AuditLogger.log("User " + owner.getEmail() + " entered command - " + WRONG_COMMAND);
+                        System.out.println(WRONG_COMMAND);
+                    }
                 }
             }
-        } else {
-            AuditLogger.log("User has entered the main menu");
-            mainMenu();
-            System.out.println("Enter " + EXIT + " to exit");
-            String command = readUserCommand();
-            switch (command) {
-                case COMMAND_ONE -> {
-                    AuditLogger.log("User " + owner.getEmail() + " entered command - 1");
-                    registerCounter(owner);
-                }
-
-                case COMMAND_TWO -> {
-                    AuditLogger.log("User " + owner.getEmail() + " entered command - 2");
-                    getListCounters(owner);
-                }
-
-                case COMMAND_THREE -> {
-                    AuditLogger.log("User " + owner.getEmail() + " entered command - 3");
-                    settingsMenu(owner);
-                }
-                case "0" -> {
-                    AuditLogger.log("User " + owner.getEmail() + " entered command - 0");
-                    break;
-                }
-                default -> {
-                    AuditLogger.log("User " + owner.getEmail() + " entered command - " + WRONG_COMMAND);
-                    System.out.println(WRONG_COMMAND);
-                }
-            }
-
-
         }
     }
 
@@ -182,9 +172,9 @@ public class ConsoleServiceMediator {
         List<User> users = userValidator.allUsers();
 
         users.forEach(user ->
-                System.out.println(
-                        String.format("Id - %d\nName - %s\nEmail - $s\nRole - %s",
-                                user.getId(), user.getName(), user.getEmail(), user.getRole())));
+                System.out.printf("~~~~~~~~~~~~~~~~~~\n"
+                                + "ID - %d\n\tName - %s\n\tEmail - %s\n\tRole - %s" + "\n~~~~~~~~~~~~~~~~~~\n",
+                        user.getId(), user.getName(), user.getEmail(), user.getRole()));
         getInfoAboutCounterThisUser(users);
     }
 
@@ -206,9 +196,10 @@ public class ConsoleServiceMediator {
             return;
         }
         AuditLogger.log("Get user information with id = " + index);
-        User user = users.get(index);
-        getListCounters(user);
-
+        User user = users.get(index - 1);
+        System.out.println("List of user water meters with id "  + user.getId());
+        getListWaterCounters(user);
+        getCounterById(userValidator.getWaterCounters(user));
     }
 
     private void getUserByEmail() {
@@ -228,22 +219,22 @@ public class ConsoleServiceMediator {
 
     }
 
-    private void settingsMenu(User owner) {
-        System.out.println(COMMAND_ONE + "Change name");
-        System.out.println(COMMAND_TWO + "Change email");
-        System.out.println(COMMAND_THREE + "Change password");
-        System.out.println(COMMAND_BACK);
-        String command = readUserCommand();
-        switch (command) {
-            case COMMAND_ONE -> changeName(owner);
-            case COMMAND_TWO -> changeEmail(owner);
-            case COMMAND_THREE -> changePassword(owner);
-            case COMMAND_BACK -> {
-                return;
-            }
-            default -> System.out.println("Wrong command");
-        }
-    }
+//    private void settingsMenu(User owner) {
+//        System.out.println(COMMAND_ONE + "Change name");
+//        System.out.println(COMMAND_TWO + "Change email");
+//        System.out.println(COMMAND_THREE + "Change password");
+//        System.out.println(COMMAND_BACK);
+//        String command = readUserCommand();
+//        switch (command) {
+//            case COMMAND_ONE -> changeName(owner);
+//            case COMMAND_TWO -> changeEmail(owner);
+//            case COMMAND_THREE -> changePassword(owner);
+//            case COMMAND_BACK -> {
+//                return;
+//            }
+//            default -> System.out.println("Wrong command");
+//        }
+//    }
 
     private void changePassword(User userToUpdate) {
         String newPassword = readInputPassword();
@@ -260,40 +251,53 @@ public class ConsoleServiceMediator {
         userValidator.updateUser(userToUpdate, newName, null, null);
     }
 
-    private void getListCounters(User owner) {
-        int count = 1;
+    private void getListWaterCounters(User owner) {
+        int id = 1;
         List<WaterCounter> waterCounters = userValidator.getWaterCounters(owner);
+        StringBuilder printInfoAboutCounter = new StringBuilder();
         for (WaterCounter counter : waterCounters) {
-            System.out.println(count + " SerialNumber - " + counter.getSerialNumber()
-                    + "\nType: " + counter.getType());
+
+            printInfoAboutCounter
+                    .append("~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
+                    .append("ID - ")
+                    .append(id++)
+                    .append("\n\tSerialNumber - ")
+                    .append(counter.getSerialNumber())
+                    .append("\n\tType: ")
+                    .append(counter.getType())
+                    .append("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         }
-        waterCounterMenu(waterCounters);
+        System.out.println(printInfoAboutCounter);
+
+        //waterCounterMenu(waterCounters);
     }
 
     private void waterCounterMenu(List<WaterCounter> waterCounters) {
-        AuditLogger.log("Get info about water counters");
-        System.out.println(COMMAND_ONE + COUNTER);
-        System.out.println(COMMAND_BACK);
-        String command = readUserCommand();
-        switch (command) {
-            case COMMAND_ONE -> {
-                AuditLogger.log("Get info about water counter");
-                getCounterById(waterCounters);
-            }
-            case COMMAND_BACK -> {
-                AuditLogger.log("Exit");
-                return;
-            }
-            default -> {
-                AuditLogger.log(WRONG_COMMAND + " " + command);
-                System.out.println(WRONG_COMMAND);
+        boolean flag = true;
+        while (flag) {
+            AuditLogger.log("Get info about water counters");
+            System.out.println(COMMAND_ONE + COUNTER);
+            System.out.println(COMMAND_BACK);
+            String command = readUserCommand();
+            switch (command) {
+                case COMMAND_ONE -> {
+                    AuditLogger.log("Get info about water counter");
+                    getCounterById(waterCounters);
+                }
+                case COMMAND_ZERO -> {
+                    AuditLogger.log("Exit");
+                    flag = false;
+                }
+                default -> {
+                    AuditLogger.log(WRONG_COMMAND + " " + command);
+                    System.out.println(WRONG_COMMAND);
+                }
             }
         }
-
     }
 
     private void getCounterById(List<WaterCounter> waterCounters) {
-        System.out.println("Enter id water counter");
+        System.out.println("Enter ID water counter");
         System.out.println(COMMAND_BACK);
         String command = readUserCommand();
         AuditLogger.log("Get info about water counter with id = " + command);
@@ -305,13 +309,12 @@ public class ConsoleServiceMediator {
             System.out.println(WRONG_COMMAND);
             return;
         }
-        if (index == 0) {
+        if (index == 0 || index > waterCounters.size()) {
             AuditLogger.log("Exit");
             return;
         }
-        WaterCounter counter = waterCounters.get(index - 1);
-
-        getInfoAboutCounter(counter);
+        WaterCounter counterById = waterCounters.get(index - 1);
+        getInfoAboutCounter(counterById);
 
     }
 
@@ -324,8 +327,8 @@ public class ConsoleServiceMediator {
         switch (command) {
             case COMMAND_ONE -> {
                 AuditLogger.log("Get info about current value");
-                System.out.println("Current value = " +
-                        counterValidator.getCurrentValue(counter.getSerialNumber()));
+                Float currentValue = counterValidator.getCurrentValue(counter.getSerialNumber());
+                System.out.printf("\nSerial number counter - %s\n\tCurrent value = %.2f\n\n", counter.getSerialNumber(), currentValue);
             }
             case COMMAND_TWO -> {
                 AuditLogger.log("Pass value");
@@ -367,26 +370,32 @@ public class ConsoleServiceMediator {
         Map<String, Float> historyValues = counterValidator.getHistoryValues(serialNumber);
         System.out.println("History values for water counter with serial number - " + serialNumber);
         for (Map.Entry<String, Float> map : historyValues.entrySet()) {
-            System.out.println(map.getKey() + " - " + map.getValue());
+            System.out.println("\tDate: " + map.getKey() + "\n\tValue: " + map.getValue());
+            System.out.println("~~~~~~~~~~~~~~~~~");
         }
     }
 
-    private void registerCounter(User owner) {
-        AuditLogger.log("Admin " + owner.getEmail() + " entered command - 1");
-        System.out.println("Enter serial number the counter");
-        String inputSerialNumber = readUserCommand();
-        System.out.println("Enter initial value");
-        String initialValue = readUserCommand();
-        Float inputValue;
-        try {
-            inputValue = Float.valueOf(initialValue);
-        } catch (NumberFormatException e) {
-            System.out.println("Invalid format");
+    private void registerCounter(@NotNull User owner) {
+        AuditLogger.log("Admin " + owner.getEmail() + " entered command - " + COMMAND_ONE);
+        System.out.println(COMMAND_BACK);
+        String inputSerialNumber = readUserCommand("Enter serial number the counter");
+        if (inputSerialNumber.equals("0")) {
+            pageForRegisteredUser(owner);
+        } else {
+            String initialValue = readUserCommand("Enter initial value");
+            Float inputValue;
+            try {
+                inputValue = Float.valueOf(initialValue);
+            } catch (NumberFormatException e) {
+                System.out.println("\nInvalid format. Please repeat again or press 0 to go back\n");
+                return;
+            }
+            String message = counterValidator
+                    .createCounter(inputSerialNumber, inputValue, owner) ?
+                    "\n\tRegistered successful\n" : "\n\tFailed to register\n";
+            counterValidator.transferData(inputSerialNumber, inputValue);
+            System.out.println(message);
         }
-        inputValue = 0f;
-        String message = counterValidator
-                .createCounter(inputSerialNumber, inputValue, owner) ? "Registered successful" : "Failed to register";
-        System.out.println(message);
     }
 
     private boolean isUserRegistered(String email) {
@@ -408,13 +417,11 @@ public class ConsoleServiceMediator {
     }
 
     private String readEmail() {
-        System.out.println(ENTER_EMAIL);
-        return readUserCommand();
+        return readUserCommand(ENTER_EMAIL);
     }
 
     private String readInputPassword() {
-        System.out.println(ENTER_PASSWORD);
-        return readUserCommand();
+        return readUserCommand(ENTER_PASSWORD);
     }
 
     private boolean registerUser() {
@@ -436,9 +443,13 @@ public class ConsoleServiceMediator {
         return userValidator.isRegister(email, password);
     }
 
-    private String readUserCommand() {
-        System.out.print("Enter your choice: ");
+    private String readUserCommand(String message) {
+        System.out.println(message);
         return scanner.nextLine();
     }
 
+    private String readUserCommand() {
+        System.out.print("\nEnter your choice: ");
+        return scanner.nextLine();
+    }
 }
