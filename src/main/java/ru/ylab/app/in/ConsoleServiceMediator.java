@@ -58,16 +58,16 @@ public class ConsoleServiceMediator {
 
     private void printMainMenuForUser() {
         AuditLogger.log("User has entered the main menu");
-        System.out.println(COMMAND_ONE + REGISTER_COUNTER);
-        System.out.println(COMMAND_TWO + COUNTERS);
+        System.out.println("\t\t" + COMMAND_ONE + REGISTER_COUNTER);
+        System.out.println("\t\t" + COMMAND_TWO + COUNTERS);
     }
 
 
     private void printMainMenuForAdmin() {
         AuditLogger.log("Admin has entered the main menu");
         printMainMenuForUser();
-        System.out.println(COMMAND_THREE + USERS);
-        System.out.println(COMMAND_ZERO + " - to exit");
+        System.out.println("\t\t" + COMMAND_THREE + USERS);
+        System.out.println("\t\t" + COMMAND_ZERO + " - to exit");
 
     }
 
@@ -103,6 +103,7 @@ public class ConsoleServiceMediator {
 
     public void pageForRegisteredUser(User owner) {
         boolean flag = true;
+        System.out.println("Welcome, " + owner.getName() + "!");
         while (flag) {
             if (owner.getRole().equals(Role.ADMIN)) {
                 printMainMenuForAdmin();
@@ -115,8 +116,12 @@ public class ConsoleServiceMediator {
 
                     case COMMAND_TWO -> {
                         AuditLogger.log("Admin" + owner.getEmail() + " entered command - 2");
-                        getListWaterCounters(owner);
-                        waterCounterMenu(userValidator.getWaterCounters(owner));
+                        List<WaterCounter> listWaterCounters = getListWaterCounters(owner);
+                        if (!listWaterCounters.isEmpty()) {
+                            waterCounterMenu(userValidator.getWaterCounters(owner));
+                        } else {
+                            System.out.println("Your water meters are not registered\n");
+                        }
                     }
                     case COMMAND_THREE -> {
                         AuditLogger.log("Admin" + owner.getEmail() + " entered command - 5");
@@ -137,7 +142,7 @@ public class ConsoleServiceMediator {
             } else {
                 AuditLogger.log("User has entered the main menu");
                 printMainMenuForUser();
-                System.out.println("Enter " + EXIT + " to exit");
+                System.out.println("\t\t" + EXIT);
                 String command = readUserCommand();
                 switch (command) {
                     case COMMAND_ONE -> {
@@ -147,16 +152,17 @@ public class ConsoleServiceMediator {
 
                     case COMMAND_TWO -> {
                         AuditLogger.log("User " + owner.getEmail() + " entered command - 2");
-                        getListWaterCounters(owner);
+                        List<WaterCounter> listWaterCounters = getListWaterCounters(owner);
+                        if (!listWaterCounters.isEmpty()) {
+                            waterCounterMenu(userValidator.getWaterCounters(owner));
+                        } else {
+                            System.out.println("Your water meters are not registered\t");
+                        }
                     }
-//
-//                    case COMMAND_THREE -> {
-//                        AuditLogger.log("User " + owner.getEmail() + " entered command - 3");
-//                        settingsMenu(owner);
-//                    }
+
                     case "0" -> {
                         AuditLogger.log("User " + owner.getEmail() + " entered command - 0");
-                        break;
+                        flag = false;
                     }
                     default -> {
                         AuditLogger.log("User " + owner.getEmail() + " entered command - " + WRONG_COMMAND);
@@ -197,61 +203,14 @@ public class ConsoleServiceMediator {
         }
         AuditLogger.log("Get user information with id = " + index);
         User user = users.get(index - 1);
-        System.out.println("List of user water meters with id "  + user.getId());
+        System.out.println("List of user water meters with id " + user.getId());
         getListWaterCounters(user);
         getCounterById(userValidator.getWaterCounters(user));
     }
 
-    private void getUserByEmail() {
 
-        System.out.println("Enter the email of the user you want to receive:\n");
-        String inputEmail = readUserCommand();
-        AuditLogger.log("Get info about user " + inputEmail);
-        User userByEmail = userValidator.findUserByEmail(inputEmail);
-        if (userByEmail != null) {
-            System.out.println(String.format("Name - %s\nEmail - %s\nRole - %s",
-                    userByEmail.getName(), userByEmail.getEmail(), userByEmail.getRole()));
-            System.out.println("List water counters:\n");
-            userByEmail
-                    .getWaterCounterList()
-                    .forEach(counter -> System.out.println(counter.getSerialNumber()));
-        }
 
-    }
-
-//    private void settingsMenu(User owner) {
-//        System.out.println(COMMAND_ONE + "Change name");
-//        System.out.println(COMMAND_TWO + "Change email");
-//        System.out.println(COMMAND_THREE + "Change password");
-//        System.out.println(COMMAND_BACK);
-//        String command = readUserCommand();
-//        switch (command) {
-//            case COMMAND_ONE -> changeName(owner);
-//            case COMMAND_TWO -> changeEmail(owner);
-//            case COMMAND_THREE -> changePassword(owner);
-//            case COMMAND_BACK -> {
-//                return;
-//            }
-//            default -> System.out.println("Wrong command");
-//        }
-//    }
-
-    private void changePassword(User userToUpdate) {
-        String newPassword = readInputPassword();
-        userValidator.updateUser(userToUpdate, null, null, newPassword);
-    }
-
-    private void changeEmail(User userToUpdate) {
-        String newEmail = readEmail();
-        userValidator.updateUser(userToUpdate, null, newEmail, null);
-    }
-
-    private void changeName(User userToUpdate) {
-        String newName = readUserCommand();
-        userValidator.updateUser(userToUpdate, newName, null, null);
-    }
-
-    private void getListWaterCounters(User owner) {
+    private List<WaterCounter> getListWaterCounters(User owner) {
         int id = 1;
         List<WaterCounter> waterCounters = userValidator.getWaterCounters(owner);
         StringBuilder printInfoAboutCounter = new StringBuilder();
@@ -268,8 +227,7 @@ public class ConsoleServiceMediator {
                     .append("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~");
         }
         System.out.println(printInfoAboutCounter);
-
-        //waterCounterMenu(waterCounters);
+        return waterCounters;
     }
 
     private void waterCounterMenu(List<WaterCounter> waterCounters) {
@@ -377,8 +335,7 @@ public class ConsoleServiceMediator {
 
     private void registerCounter(@NotNull User owner) {
         AuditLogger.log("Admin " + owner.getEmail() + " entered command - " + COMMAND_ONE);
-        System.out.println(COMMAND_BACK);
-        String inputSerialNumber = readUserCommand("Enter serial number the counter");
+        String inputSerialNumber = readUserCommand("Enter serial number the counter or 0 to go back");
         if (inputSerialNumber.equals("0")) {
             pageForRegisteredUser(owner);
         } else {
@@ -393,7 +350,7 @@ public class ConsoleServiceMediator {
             String message = counterValidator
                     .createCounter(inputSerialNumber, inputValue, owner) ?
                     "\n\tRegistered successful\n" : "\n\tFailed to register\n";
-            counterValidator.transferData(inputSerialNumber, inputValue);
+            //counterValidator.transferData(inputSerialNumber, inputValue);
             System.out.println(message);
         }
     }
@@ -426,16 +383,13 @@ public class ConsoleServiceMediator {
 
     private boolean registerUser() {
         System.out.println("New user registration");
-        System.out.println(ENTER_NAME);
-        String name = readUserCommand();
-        System.out.println(ENTER_EMAIL);
-        String email = readUserCommand();
-        boolean unique = userValidator.isUnique(email);
-        if (unique) {
+        String name = readUserCommand(ENTER_NAME);
+        String email = readUserCommand(ENTER_EMAIL);
+        boolean isUniqueEmail = userValidator.isUnique(email);
+        if (isUniqueEmail) {
             return false;
         }
-        System.out.println(ENTER_PASSWORD);
-        String password = readUserCommand();
+        String password = readUserCommand(ENTER_PASSWORD);
         return userValidator.createUser(name, email, password);
     }
 
@@ -449,7 +403,7 @@ public class ConsoleServiceMediator {
     }
 
     private String readUserCommand() {
-        System.out.print("\nEnter your choice: ");
+        System.out.print("\nEnter your choice:\n");
         return scanner.nextLine();
     }
 }

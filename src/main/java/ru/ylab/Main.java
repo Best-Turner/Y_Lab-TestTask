@@ -39,7 +39,7 @@ public class Main {
         WaterCounter counter1 = new WaterCounter(1L, "H-1234", CounterType.HOT, 123f, admin);
         WaterCounter counter2 = new WaterCounter(2L, "C-4321", CounterType.COLD, 321f, user);
         admin.setWaterCounters(new HashSet<>());
-        user.setWaterCounters(new HashSet<>());
+        user.setWaterCounters(new HashSet<>()); //newUser@mail.ru  1234
         admin.getWaterCounterList().add(counter1);
         user.getWaterCounterList().add(counter2);
 

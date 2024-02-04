@@ -25,7 +25,7 @@ public class WaterCounterServiceImpl implements WaterCounterService {
     public void save(WaterCounter waterCounter) {
         if (!repository.isExist(waterCounter.getSerialNumber())) {
             repository.addWaterCounter(waterCounter);
-            storageService.registrationCounter(waterCounter.getSerialNumber());
+            storageService.registrationCounter(waterCounter);
         }
     }
 
@@ -33,7 +33,7 @@ public class WaterCounterServiceImpl implements WaterCounterService {
     public WaterCounter getWaterCounter(String serialNumber) throws WaterCounterNotFoundException {
 
         Optional<WaterCounter> waterCounter = repository.getWaterCounter(serialNumber);
-        if (!waterCounter.isPresent()) {
+        if (waterCounter.isEmpty()) {
             throw new WaterCounterNotFoundException("WaterCounter with this serial number = " + serialNumber + " not found");
         }
         return waterCounter.get();

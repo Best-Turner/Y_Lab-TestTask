@@ -1,12 +1,13 @@
 package ru.ylab.service;
 
 import ru.ylab.exception.InvalidDataException;
+import ru.ylab.model.WaterCounter;
 
 import java.util.Map;
 
 public interface CounterDataStorageService {
 
-    void registrationCounter(String serialNumber);
+    void registrationCounter(WaterCounter waterCounter);
 
     boolean submitValue(String serialNumber, Float value) throws InvalidDataException;
 

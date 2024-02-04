@@ -35,13 +35,15 @@ public class CounterDataStorageServiceTest {
 
     @Before
     public void setUp() throws Exception {
+        waterCounter = new WaterCounter(ID, SERIAL_NUMBER, TYPE,VALUE, owner);
         MockitoAnnotations.openMocks(this);
 
     }
 
     @Test
     public void shouldCallMethodRegistrationWaterCounter() {
-        service.registrationCounter(SERIAL_NUMBER);
+        verify(repository, never()).registrationWaterCounter(SERIAL_NUMBER);
+        service.registrationCounter(waterCounter);
         verify(repository, times(1)).registrationWaterCounter(SERIAL_NUMBER);
     }
 

@@ -45,7 +45,7 @@ public class WaterCounterServiceTest {
         when(repository.isExist(SERIAL_NUMBER)).thenReturn(false);
         service.save(waterCounter);
         verify(repository, times(1)).addWaterCounter(waterCounter);
-        verify(storageService, times(1)).registrationCounter(SERIAL_NUMBER);
+        verify(storageService, times(1)).registrationCounter(waterCounter);
     }
 
     @Test
@@ -53,7 +53,7 @@ public class WaterCounterServiceTest {
         when(repository.isExist(SERIAL_NUMBER)).thenReturn(true);
         service.save(waterCounter);
         verify(repository, never()).addWaterCounter(waterCounter);
-        verify(storageService, never()).registrationCounter(SERIAL_NUMBER);
+        verify(storageService, never()).registrationCounter(waterCounter);
     }
 
     @Test
