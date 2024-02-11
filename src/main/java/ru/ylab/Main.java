@@ -33,6 +33,7 @@ public class Main {
         Map<String, WaterMeter> counterMap = new HashMap<>();
         Map<String, User> userMap = new HashMap<>();
 
+
         User admin = new User(1L, "Admin", "admin@mail.ru", "1234", Role.ADMIN);
         User user = new User(2L, "User", "user@mail.ru", "1234", Role.USER);
 
