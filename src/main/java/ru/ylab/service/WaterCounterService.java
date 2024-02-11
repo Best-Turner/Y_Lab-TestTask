@@ -2,18 +2,19 @@ package ru.ylab.service;
 
 import ru.ylab.exception.InvalidDataException;
 import ru.ylab.exception.WaterCounterNotFoundException;
-import ru.ylab.model.WaterCounter;
+import ru.ylab.model.MeterData;
+import ru.ylab.model.WaterMeter;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
 public interface WaterCounterService {
 
-    void save(WaterCounter waterCounter);
+    void save(WaterMeter waterCounter);
 
-    WaterCounter getWaterCounter(String serialNumber) throws WaterCounterNotFoundException;
+    WaterMeter getWaterCounter(String serialNumber) throws WaterCounterNotFoundException;
 
-    Set<WaterCounter> allWaterCounter();
+    Set<WaterMeter> allWaterCounter();
 
     void transferData(String serialNumber, Float newValue) throws InvalidDataException;
 
@@ -23,6 +24,6 @@ public interface WaterCounterService {
 
     Float getValueByDate(String serialNumber, String date);
 
-    Map<String, Float> getValues(String serialNumber);
+    List<MeterData> getValues(String serialNumber);
 }
 

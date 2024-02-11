@@ -2,7 +2,7 @@ package ru.ylab.service.impl;
 
 import ru.ylab.exception.UserNotFoundException;
 import ru.ylab.model.User;
-import ru.ylab.model.WaterCounter;
+import ru.ylab.model.WaterMeter;
 import ru.ylab.repository.UserRepository;
 import ru.ylab.service.UserService;
 
@@ -19,7 +19,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void saveUser(User user) {
         if (!isExist(user.getEmail())) {
-            Set<WaterCounter> counters = new HashSet<>();
+            Set<WaterMeter> counters = new HashSet<>();
             user.setWaterCounters(counters);
             repository.save(user);
         }
@@ -77,18 +77,18 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public List<WaterCounter> waterCounters(User owner) {
-        List<WaterCounter> list = new ArrayList<>();
+    public List<WaterMeter> waterCounters(User owner) {
+        List<WaterMeter> list = new ArrayList<>();
         String email = owner.getEmail();
-        Set<WaterCounter> waterCounters = repository.getWaterCounters(email);
+        Set<WaterMeter> waterCounters = repository.getWaterCounters(email);
         waterCounters.forEach(list::add);
         return list;
     }
 
     @Override
-    public boolean addWaterCounter(User user, WaterCounter waterCounter) {
+    public boolean addWaterCounter(User user, WaterMeter waterCounter) {
         String email = user.getEmail();
-        Set<WaterCounter> waterCounters = repository.getWaterCounters(email);
+        Set<WaterMeter> waterCounters = repository.getWaterCounters(email);
         if (waterCounters.contains(waterCounter)) {
             return false;
         }

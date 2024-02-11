@@ -1,34 +1,42 @@
 package ru.ylab.service.impl;
 
 import ru.ylab.exception.InvalidDataException;
-import ru.ylab.model.WaterCounter;
-import ru.ylab.repository.CounterDataStorageRepository;
-import ru.ylab.service.CounterDataStorageService;
+import ru.ylab.model.MeterData;
+import ru.ylab.model.WaterMeter;
+import ru.ylab.repository.MeterDataRepository;
+import ru.ylab.service.MeterDataService;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Map;
-import java.util.Set;
+import java.util.Collections;
+import java.util.List;
 
 /**
- * The `CounterDataStorageServiceImpl` class implements the `CounterDataStorageService` interface
+ * The `MeterDataServiceImpl` class implements the `MeterDataService` interface
  * and provides services for managing water counter data storage operations. It utilizes a
- * `CounterDataStorageRepository` for data storage and offers methods for registering counters,
+ * `WaterMeterRepository` for data storage and offers methods for registering counters,
  * submitting values, retrieving current and historical values, checking existence, and deleting counters.
  */
-public class CounterDataStorageServiceImpl implements CounterDataStorageService {
-    private final CounterDataStorageRepository repository;
+public class MeterDataServiceImpl implements MeterDataService {
+    private final MeterDataRepository repository;
 
     /**
-     * Constructs a new `CounterDataStorageServiceImpl` with the specified `CounterDataStorageRepository`.
+     * Constructs a new `MeterDataServiceImpl` with the specified `WaterMeterRepository`.
      *
      * @param repository The repository to be used by the service implementation.
      */
-    public CounterDataStorageServiceImpl(CounterDataStorageRepository repository) {
+    public MeterDataServiceImpl(MeterDataRepository repository) {
         this.repository = repository;
+    }
+
+    /**
+     * Gets the current date.
+     *
+     * @return The current date as a LocalDate object.
+     */
+    private static LocalDate now() {
+        return LocalDate.now();
     }
 
     /**
@@ -37,11 +45,11 @@ public class CounterDataStorageServiceImpl implements CounterDataStorageService 
      * @param waterCounter The serial number of the water counter to register.
      */
     @Override
-    public void registrationCounter(WaterCounter waterCounter) {
+    public void registrationCounter(WaterMeter waterCounter) {
         String serialNumber = waterCounter.getSerialNumber();
         Float value = waterCounter.getCurrentValue();
-        repository.registrationWaterCounter(serialNumber);
-        repository.addValue(serialNumber, getKeyFromDate(now()), value);
+        repository.registrationWaterMeter(serialNumber);
+        repository.addValue(new MeterData(serialNumber, getKeyFromDate(now()), value));
     }
 
     /**
@@ -70,7 +78,7 @@ public class CounterDataStorageServiceImpl implements CounterDataStorageService 
         }
 
         currentValue = value;
-        repository.addValue(serialNumber, getKeyFromDate(now()), currentValue);
+        repository.addValue(new MeterData(serialNumber, getKeyFromDate(now()), currentValue));
         return true;
     }
 
@@ -115,9 +123,9 @@ public class CounterDataStorageServiceImpl implements CounterDataStorageService 
      * @return A map of all values associated with the specified water counter.
      */
     @Override
-    public Map<String, Float> getValues(String serialNumber) {
+    public List<MeterData> getValues(String serialNumber) {
         if (!isRegistrInStorage(serialNumber)) {
-            return null;
+            return Collections.emptyList();
         }
         return repository.getValues(serialNumber);
     }
@@ -164,14 +172,13 @@ public class CounterDataStorageServiceImpl implements CounterDataStorageService 
      * @return The last recorded value.
      */
     private Float findLastValue(String serialNumber) {
-        Map<String, Float> values = repository.getValues(serialNumber);
-        LocalDate lastDateDataTransfer = getLastDateTransfer(values.keySet());
+        List<MeterData> data = repository.getValues(serialNumber);
+        LocalDate lastDateDataTransfer = getLastDateTransfer(data);
         String keyFromDate = getKeyFromDate(lastDateDataTransfer);
         if (keyFromDate == null) {
             return -1f;
         }
-        return values.get(keyFromDate);
-
+        return data.stream().filter(el -> el.getDate().equals(keyFromDate)).findFirst().get().getValue();
     }
 
     /**
@@ -181,12 +188,12 @@ public class CounterDataStorageServiceImpl implements CounterDataStorageService 
      * @return The key from the last recorded date.
      */
 
-    private LocalDate getLastDateTransfer(Set<String> dates) {
+    private LocalDate getLastDateTransfer(List<MeterData> dates) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-M");
         LocalDate lastDate = null;
 
-        for (String dateStr : dates) {
-            LocalDate currentDate = YearMonth.parse(dateStr, formatter).atDay(1);
+        for (MeterData data : dates) {
+            LocalDate currentDate = YearMonth.parse(data.getDate(), formatter).atDay(1);
 
             if (lastDate == null || currentDate.isAfter(lastDate)) {
                 lastDate = currentDate;
@@ -197,23 +204,14 @@ public class CounterDataStorageServiceImpl implements CounterDataStorageService 
 
     private boolean canChangeDate(String serialNumber) {
 
-        Set<String> dateWithValues = repository.getValues(serialNumber).keySet();
-        LocalDate lastDateTransfer = getLastDateTransfer(dateWithValues);
+        List<MeterData> data = repository.getValues(serialNumber);
+        LocalDate lastDateTransfer = getLastDateTransfer(data);
         if (lastDateTransfer == null) {
             return true;
         }
         LocalDate now = now();
         return lastDateTransfer.plusMonths(1).minusDays(1).isBefore(now);
 
-    }
-
-    /**
-     * Gets the current date.
-     *
-     * @return The current date as a LocalDate object.
-     */
-    private static LocalDate now() {
-        return LocalDate.now();
     }
 
 }

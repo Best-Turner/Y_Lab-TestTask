@@ -1,13 +1,14 @@
 package ru.ylab.service;
 
 import ru.ylab.exception.InvalidDataException;
-import ru.ylab.model.WaterCounter;
+import ru.ylab.model.MeterData;
+import ru.ylab.model.WaterMeter;
 
-import java.util.Map;
+import java.util.List;
 
-public interface CounterDataStorageService {
+public interface MeterDataService {
 
-    void registrationCounter(WaterCounter waterCounter);
+    void registrationCounter(WaterMeter waterCounter);
 
     boolean submitValue(String serialNumber, Float value) throws InvalidDataException;
 
@@ -15,7 +16,7 @@ public interface CounterDataStorageService {
 
     Float getValueByDate(String serialNumber, String date);
 
-    Map<String, Float> getValues(String serialNumber);
+    List<MeterData> getValues(String serialNumber);
 
     boolean isRegistrInStorage(String serialNumber);
 

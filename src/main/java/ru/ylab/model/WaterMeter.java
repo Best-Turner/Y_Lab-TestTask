@@ -7,7 +7,7 @@ import java.util.Objects;
  * It stores information such as the unique identifier, serial number, type of counter,
  * current value, and the owner of the water counter.
  */
-public class WaterCounter {
+public class WaterMeter {
 
     private Long id;
     private String serialNumber;
@@ -18,7 +18,7 @@ public class WaterCounter {
     /**
      * Default constructor for the `WaterCounter` class.
      */
-    public WaterCounter() {
+    public WaterMeter() {
     }
 
     /**
@@ -30,7 +30,7 @@ public class WaterCounter {
      * @param currentValue The current measured value of the water consumption.
      * @param owner        The user who owns or is assigned the water counter.
      */
-    public WaterCounter(Long id, String serialNumber, CounterType type, Float currentValue, User owner) {
+    public WaterMeter(Long id, String serialNumber, CounterType type, Float currentValue, User owner) {
         this.id = id;
         this.serialNumber = serialNumber;
         this.type = type;
@@ -138,7 +138,7 @@ public class WaterCounter {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        WaterCounter that = (WaterCounter) o;
+        WaterMeter that = (WaterMeter) o;
         return Objects.equals(serialNumber, that.serialNumber);
     }
 

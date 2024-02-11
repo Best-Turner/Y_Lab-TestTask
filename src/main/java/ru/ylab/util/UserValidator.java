@@ -1,7 +1,7 @@
 package ru.ylab.util;
 
 import ru.ylab.model.User;
-import ru.ylab.model.WaterCounter;
+import ru.ylab.model.WaterMeter;
 
 import java.util.List;
 
@@ -22,7 +22,7 @@ public interface UserValidator {
 
     boolean isAdmin(User user);
 
-    boolean addCounter(User user, WaterCounter waterCounter);
+    boolean addCounter(User user, WaterMeter waterCounter);
 
-    List<WaterCounter> getWaterCounters(User owner);
+    List<WaterMeter> getWaterCounters(User owner);
 }

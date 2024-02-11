@@ -7,13 +7,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import ru.ylab.exception.InvalidDataException;
 import ru.ylab.model.CounterType;
+import ru.ylab.model.MeterData;
 import ru.ylab.model.User;
-import ru.ylab.model.WaterCounter;
-import ru.ylab.repository.CounterDataStorageRepository;
-import ru.ylab.service.impl.CounterDataStorageServiceImpl;
+import ru.ylab.model.WaterMeter;
+import ru.ylab.repository.MeterDataRepository;
+import ru.ylab.service.impl.MeterDataServiceImpl;
 
 import java.util.Collections;
-import java.util.Map;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -27,24 +28,24 @@ public class CounterDataStorageServiceTest {
     private final static String DATE = "2024-1";
     private final static CounterType TYPE = CounterType.HOT;
     @Mock
-    CounterDataStorageRepository repository;
+    MeterDataRepository repository;
     @InjectMocks
-    CounterDataStorageServiceImpl service;
-    private WaterCounter waterCounter;
+    MeterDataServiceImpl service;
+    private WaterMeter waterCounter;
     private User owner;
 
     @Before
     public void setUp() throws Exception {
-        waterCounter = new WaterCounter(ID, SERIAL_NUMBER, TYPE,VALUE, owner);
+        waterCounter = new WaterMeter(ID, SERIAL_NUMBER, TYPE, VALUE, owner);
         MockitoAnnotations.openMocks(this);
 
     }
 
     @Test
     public void shouldCallMethodRegistrationWaterCounter() {
-        verify(repository, never()).registrationWaterCounter(SERIAL_NUMBER);
+        verify(repository, never()).registrationWaterMeter(SERIAL_NUMBER);
         service.registrationCounter(waterCounter);
-        verify(repository, times(1)).registrationWaterCounter(SERIAL_NUMBER);
+        verify(repository, times(1)).registrationWaterMeter(SERIAL_NUMBER);
     }
 
     @Test
@@ -56,11 +57,11 @@ public class CounterDataStorageServiceTest {
     }
 
     @Test
-    public void whenGetValuesThenReturnMap() {
-        Map<String, Float> expect = Collections.emptyMap();
+    public void whenGetValuesThenReturnList() {
+        List<MeterData> expect = Collections.emptyList();
         when(repository.isExist(SERIAL_NUMBER)).thenReturn(true);
         when(repository.getValues(SERIAL_NUMBER)).thenReturn(expect);
-        Map<String, Float> actual = service.getValues(SERIAL_NUMBER);
+        List<MeterData> actual = service.getValues(SERIAL_NUMBER);
         assertEquals(expect, actual);
     }
 

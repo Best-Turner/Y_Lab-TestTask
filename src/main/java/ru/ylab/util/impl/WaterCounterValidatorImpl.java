@@ -3,12 +3,13 @@ package ru.ylab.util.impl;
 import ru.ylab.exception.InvalidDataException;
 import ru.ylab.exception.WaterCounterNotFoundException;
 import ru.ylab.model.CounterType;
+import ru.ylab.model.MeterData;
 import ru.ylab.model.User;
-import ru.ylab.model.WaterCounter;
+import ru.ylab.model.WaterMeter;
 import ru.ylab.service.WaterCounterService;
 import ru.ylab.util.WaterCounterValidator;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,7 +39,7 @@ public class WaterCounterValidatorImpl implements WaterCounterValidator {
         if (value == null) {
             value = 0f;
         }
-        WaterCounter newWaterCounter = new WaterCounter(++count, serialNumber, counterType, value, owner);
+        WaterMeter newWaterCounter = new WaterMeter(++count, serialNumber, counterType, value, owner);
         service.save(newWaterCounter);
         owner.getWaterCounterList().add(newWaterCounter);
         return true;
@@ -53,7 +54,7 @@ public class WaterCounterValidatorImpl implements WaterCounterValidator {
     }
 
     @Override
-    public Map<String, Float> getHistoryValues(String serialNumber) {
+    public List<MeterData> getHistoryValues(String serialNumber) {
         return service.getValues(serialNumber);
     }
 
@@ -79,7 +80,7 @@ public class WaterCounterValidatorImpl implements WaterCounterValidator {
     }
 
     @Override
-    public WaterCounter findWaterCounterBySerialNumber(String serialNumber) {
+    public WaterMeter findWaterCounterBySerialNumber(String serialNumber) {
         if (validateSerialNumber(serialNumber)) {
             return null;
         }
@@ -92,7 +93,7 @@ public class WaterCounterValidatorImpl implements WaterCounterValidator {
     }
 
     @Override
-    public Set<WaterCounter> getWaterCounters() {
+    public Set<WaterMeter> getWaterCounters() {
         return service.allWaterCounter();
     }
 

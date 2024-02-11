@@ -7,10 +7,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import ru.ylab.exception.InvalidDataException;
 import ru.ylab.exception.WaterCounterNotFoundException;
-import ru.ylab.model.CounterType;
-import ru.ylab.model.Role;
-import ru.ylab.model.User;
-import ru.ylab.model.WaterCounter;
+import ru.ylab.model.*;
 import ru.ylab.repository.WaterCounterRepository;
 import ru.ylab.service.impl.WaterCounterServiceImpl;
 
@@ -25,10 +22,10 @@ public class WaterCounterServiceTest {
     private final static Float VALUE = 123f;
     private final static CounterType TYPE = CounterType.HOT;
     @Mock
-    CounterDataStorageService storageService;
+    MeterDataService storageService;
     @Mock
     WaterCounterRepository repository;
-    private WaterCounter waterCounter;
+    private WaterMeter waterCounter;
     private User owner;
     @InjectMocks
     private WaterCounterServiceImpl service;
@@ -36,7 +33,7 @@ public class WaterCounterServiceTest {
     @Before
     public void setUp() throws Exception {
         owner = new User(1L, "user", "user@mai.ru", "1234", Role.USER);
-        waterCounter = new WaterCounter(ID, SERIAL_NUMBER, TYPE, VALUE, owner);
+        waterCounter = new WaterMeter(ID, SERIAL_NUMBER, TYPE, VALUE, owner);
         MockitoAnnotations.openMocks(this);
     }
 
@@ -59,7 +56,7 @@ public class WaterCounterServiceTest {
     @Test
     public void whenGetIsExistWaterCounterReturnWaterCounter() throws WaterCounterNotFoundException {
         when(repository.getWaterCounter(SERIAL_NUMBER)).thenReturn(Optional.of(waterCounter));
-        WaterCounter actual = service.getWaterCounter(SERIAL_NUMBER);
+        WaterMeter actual = service.getWaterCounter(SERIAL_NUMBER);
         verify(repository, times(1)).getWaterCounter(SERIAL_NUMBER);
         assertEquals(waterCounter, actual);
     }
@@ -73,13 +70,13 @@ public class WaterCounterServiceTest {
 
     @Test
     public void whenGetSetWaterCountersThenReturnSet() {
-        Map<String, WaterCounter> counterMap = new HashMap<>();
-        Set<WaterCounter> expect = new HashSet<>();
+        Map<String, WaterMeter> counterMap = new HashMap<>();
+        Set<WaterMeter> expect = new HashSet<>();
         expect.add(waterCounter);
         counterMap.put(SERIAL_NUMBER, waterCounter);
         counterMap.put(SERIAL_NUMBER.concat("123"), waterCounter);
         when(repository.getAllWaterCounters()).thenReturn(counterMap);
-        Set<WaterCounter> actual = service.allWaterCounter();
+        Set<WaterMeter> actual = service.allWaterCounter();
         assertEquals(expect, actual);
     }
 
@@ -120,9 +117,9 @@ public class WaterCounterServiceTest {
 
     @Test
     public void shouldCallMethodGetValuesAndReturnMap() {
-        when(storageService.getValues(SERIAL_NUMBER)).thenReturn(Collections.emptyMap());
-        Map<String, Float> actual = service.getValues(SERIAL_NUMBER);
+        when(storageService.getValues(SERIAL_NUMBER)).thenReturn(Collections.emptyList());
+        List<MeterData> actual = service.getValues(SERIAL_NUMBER);
         verify(storageService, times(1)).getValues(SERIAL_NUMBER);
-        assertEquals(Collections.emptyMap(), actual);
+        assertEquals(Collections.emptyList(), actual);
     }
 }

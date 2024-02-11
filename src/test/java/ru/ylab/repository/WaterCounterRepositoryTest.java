@@ -5,7 +5,7 @@ import org.junit.Test;
 import ru.ylab.model.CounterType;
 import ru.ylab.model.Role;
 import ru.ylab.model.User;
-import ru.ylab.model.WaterCounter;
+import ru.ylab.model.WaterMeter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,18 +19,18 @@ public class WaterCounterRepositoryTest {
     private final static String SERIAL_NUMBER = "H-1234";
     private final static Float VALUE = 123f;
     private final static CounterType TYPE = CounterType.HOT;
-    private WaterCounter waterCounter;
-    private WaterCounter waterCounter1;
+    private WaterMeter waterCounter;
+    private WaterMeter waterCounter1;
     private User owner;
     private WaterCounterRepository repository;
-    private Map<String, WaterCounter> counterMap;
+    private Map<String, WaterMeter> counterMap;
 
 
     @Before
     public void setUp() throws Exception {
         owner = new User(1L, "user", "user@mai.ru", "1234", Role.USER);
-        waterCounter = new WaterCounter(ID, SERIAL_NUMBER, TYPE, VALUE, owner);
-        waterCounter1 = new WaterCounter(ID + 1, SERIAL_NUMBER.concat("123"), TYPE, VALUE, owner);
+        waterCounter = new WaterMeter(ID, SERIAL_NUMBER, TYPE, VALUE, owner);
+        waterCounter1 = new WaterMeter(ID + 1, SERIAL_NUMBER.concat("123"), TYPE, VALUE, owner);
         counterMap = new HashMap<>();
         counterMap.put(SERIAL_NUMBER, waterCounter);
         repository = new WaterCounterRepository(counterMap);
@@ -62,13 +62,13 @@ public class WaterCounterRepositoryTest {
 
     @Test
     public void whenGetIsExistWaterCounterReturnWaterCounter() {
-        Optional<WaterCounter> actual = repository.getWaterCounter(SERIAL_NUMBER);
+        Optional<WaterMeter> actual = repository.getWaterCounter(SERIAL_NUMBER);
         assertEquals(Optional.of(waterCounter), actual);
     }
 
     @Test
     public void whenGetNotExistWaterCounterThenReturnEmpty() {
-        Optional<WaterCounter> actual = repository.getWaterCounter(SERIAL_NUMBER + "123");
+        Optional<WaterMeter> actual = repository.getWaterCounter(SERIAL_NUMBER + "123");
         assertEquals(Optional.empty(), actual);
     }
 
@@ -93,7 +93,7 @@ public class WaterCounterRepositoryTest {
 
     @Test
     public void whenGetListWaterCounterThenReturnMap() {
-        Map<String, WaterCounter> actual = repository.getAllWaterCounters();
+        Map<String, WaterMeter> actual = repository.getAllWaterCounters();
         assertEquals(HashMap.class, actual.getClass());
         assertEquals(counterMap, actual);
     }

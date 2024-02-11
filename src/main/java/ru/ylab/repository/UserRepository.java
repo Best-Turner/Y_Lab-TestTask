@@ -1,7 +1,7 @@
 package ru.ylab.repository;
 
 import ru.ylab.model.User;
-import ru.ylab.model.WaterCounter;
+import ru.ylab.model.WaterMeter;
 
 import java.util.Map;
 import java.util.Optional;
@@ -90,8 +90,8 @@ public class UserRepository {
      * @param email The email address of the user.
      * @return The set of water counters associated with the user.
      */
-    public Set<WaterCounter> getWaterCounters(String email) {
-        Set<WaterCounter> waterCounterList = users.get(email).getWaterCounterList();
+    public Set<WaterMeter> getWaterCounters(String email) {
+        Set<WaterMeter> waterCounterList = users.get(email).getWaterCounterList();
         return waterCounterList;
     }
 
@@ -101,7 +101,7 @@ public class UserRepository {
      * @param email        The email address of the user.
      * @param waterCounter The water counter to be added.
      */
-    public void addWaterCounterToUser(String email, WaterCounter waterCounter) {
+    public void addWaterCounterToUser(String email, WaterMeter waterCounter) {
         users.get(email).getWaterCounterList().add(waterCounter);
     }
 }

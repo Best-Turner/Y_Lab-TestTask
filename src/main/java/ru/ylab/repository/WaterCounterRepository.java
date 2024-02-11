@@ -1,6 +1,6 @@
 package ru.ylab.repository;
 
-import ru.ylab.model.WaterCounter;
+import ru.ylab.model.WaterMeter;
 
 import java.util.Map;
 import java.util.Optional;
@@ -13,14 +13,14 @@ import java.util.Optional;
 
 public class WaterCounterRepository {
 
-    private final Map<String, WaterCounter> waterCounters;
+    private final Map<String, WaterMeter> waterCounters;
 
     /**
      * Constructs a new `WaterCounterRepository` with the given map of water counters.
      *
      * @param waterCounter The initial map of water counters to be used in the repository.
      */
-    public WaterCounterRepository(Map<String, WaterCounter> waterCounter) {
+    public WaterCounterRepository(Map<String, WaterMeter> waterCounter) {
         this.waterCounters = waterCounter;
     }
 
@@ -30,7 +30,7 @@ public class WaterCounterRepository {
      * @param serialNumber The serial number of the water counter to retrieve.
      * @return An Optional containing the water counter with the given serial number, or empty if not found.
      */
-    public Optional<WaterCounter> getWaterCounter(String serialNumber) {
+    public Optional<WaterMeter> getWaterCounter(String serialNumber) {
         return Optional.ofNullable(waterCounters.get(serialNumber));
     }
 
@@ -39,7 +39,7 @@ public class WaterCounterRepository {
      *
      * @param waterCounter The water counter to be added.
      */
-    public void addWaterCounter(WaterCounter waterCounter) {
+    public void addWaterCounter(WaterMeter waterCounter) {
         waterCounters.put(waterCounter.getSerialNumber(), waterCounter);
     }
 
@@ -49,7 +49,7 @@ public class WaterCounterRepository {
      * @param serialNumber The serial number of the water counter to be updated.
      * @param waterCounter The updated water counter information.
      */
-    public void update(String serialNumber, WaterCounter waterCounter) {
+    public void update(String serialNumber, WaterMeter waterCounter) {
         waterCounters.replace(serialNumber, waterCounter);
     }
 
@@ -59,7 +59,7 @@ public class WaterCounterRepository {
      * @param waterCounter The water counter to be deleted.
      * @return True if the deletion was successful, false otherwise.
      */
-    public boolean delete(WaterCounter waterCounter) {
+    public boolean delete(WaterMeter waterCounter) {
         waterCounters.remove(waterCounter.getSerialNumber());
         return true;
     }
@@ -90,7 +90,7 @@ public class WaterCounterRepository {
      *
      * @return The map of water counters in the repository.
      */
-    public Map<String, WaterCounter> getAllWaterCounters() {
+    public Map<String, WaterMeter> getAllWaterCounters() {
         return waterCounters;
     }
 }

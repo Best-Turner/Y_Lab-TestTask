@@ -1,15 +1,15 @@
 package ru.ylab.app.in;
 
 import org.jetbrains.annotations.NotNull;
+import ru.ylab.model.MeterData;
 import ru.ylab.model.Role;
 import ru.ylab.model.User;
-import ru.ylab.model.WaterCounter;
+import ru.ylab.model.WaterMeter;
 import ru.ylab.util.AuditLogger;
 import ru.ylab.util.UserValidator;
 import ru.ylab.util.WaterCounterValidator;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 
 public class ConsoleServiceMediator {
@@ -116,7 +116,7 @@ public class ConsoleServiceMediator {
 
                     case COMMAND_TWO -> {
                         AuditLogger.log("Admin" + owner.getEmail() + " entered command - 2");
-                        List<WaterCounter> listWaterCounters = getListWaterCounters(owner);
+                        List<WaterMeter> listWaterCounters = getListWaterCounters(owner);
                         if (!listWaterCounters.isEmpty()) {
                             waterCounterMenu(userValidator.getWaterCounters(owner));
                         } else {
@@ -152,7 +152,7 @@ public class ConsoleServiceMediator {
 
                     case COMMAND_TWO -> {
                         AuditLogger.log("User " + owner.getEmail() + " entered command - 2");
-                        List<WaterCounter> listWaterCounters = getListWaterCounters(owner);
+                        List<WaterMeter> listWaterCounters = getListWaterCounters(owner);
                         if (!listWaterCounters.isEmpty()) {
                             waterCounterMenu(userValidator.getWaterCounters(owner));
                         } else {
@@ -209,12 +209,11 @@ public class ConsoleServiceMediator {
     }
 
 
-
-    private List<WaterCounter> getListWaterCounters(User owner) {
+    private List<WaterMeter> getListWaterCounters(User owner) {
         int id = 1;
-        List<WaterCounter> waterCounters = userValidator.getWaterCounters(owner);
+        List<WaterMeter> waterCounters = userValidator.getWaterCounters(owner);
         StringBuilder printInfoAboutCounter = new StringBuilder();
-        for (WaterCounter counter : waterCounters) {
+        for (WaterMeter counter : waterCounters) {
 
             printInfoAboutCounter
                     .append("~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
@@ -230,7 +229,7 @@ public class ConsoleServiceMediator {
         return waterCounters;
     }
 
-    private void waterCounterMenu(List<WaterCounter> waterCounters) {
+    private void waterCounterMenu(List<WaterMeter> waterCounters) {
         boolean flag = true;
         while (flag) {
             AuditLogger.log("Get info about water counters");
@@ -254,7 +253,7 @@ public class ConsoleServiceMediator {
         }
     }
 
-    private void getCounterById(List<WaterCounter> waterCounters) {
+    private void getCounterById(List<WaterMeter> waterCounters) {
         System.out.println("Enter ID water counter");
         System.out.println(COMMAND_BACK);
         String command = readUserCommand();
@@ -271,12 +270,12 @@ public class ConsoleServiceMediator {
             AuditLogger.log("Exit");
             return;
         }
-        WaterCounter counterById = waterCounters.get(index - 1);
+        WaterMeter counterById = waterCounters.get(index - 1);
         getInfoAboutCounter(counterById);
 
     }
 
-    private void getInfoAboutCounter(WaterCounter counter) {
+    private void getInfoAboutCounter(WaterMeter counter) {
         System.out.println(COMMAND_ONE + CURRENT_VALUE);
         System.out.println(COMMAND_TWO + TRANSFER_DATA);
         System.out.println(COMMAND_THREE + HISTORY_VALUES);
@@ -307,7 +306,7 @@ public class ConsoleServiceMediator {
         }
     }
 
-    private void passValue(WaterCounter counter) {
+    private void passValue(WaterMeter counter) {
         System.out.println("Enter new value: ");
         System.out.println(COMMAND_BACK);
         String command = readUserCommand();
@@ -325,10 +324,10 @@ public class ConsoleServiceMediator {
     }
 
     private void printValues(String serialNumber) {
-        Map<String, Float> historyValues = counterValidator.getHistoryValues(serialNumber);
+        List<MeterData> historyValues = counterValidator.getHistoryValues(serialNumber);
         System.out.println("History values for water counter with serial number - " + serialNumber);
-        for (Map.Entry<String, Float> map : historyValues.entrySet()) {
-            System.out.println("\tDate: " + map.getKey() + "\n\tValue: " + map.getValue());
+        for (MeterData data : historyValues) {
+            System.out.println("\tDate: " + data.getDate() + "\n\tValue: " + data.getValue());
             System.out.println("~~~~~~~~~~~~~~~~~");
         }
     }

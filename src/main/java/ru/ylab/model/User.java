@@ -34,7 +34,7 @@ public class User {
     /**
      * The list water counters..
      */
-    private Set<WaterCounter> waterCounterList;
+    private Set<WaterMeter> waterCounterList;
 
     public User() {
     }
@@ -118,11 +118,11 @@ public class User {
      * @return The list of user's water counters.
      */
 
-    public Set<WaterCounter> getWaterCounterList() {
+    public Set<WaterMeter> getWaterCounterList() {
         return waterCounterList;
     }
 
-    public void setWaterCounters(Set<WaterCounter> waterCounterList) {
+    public void setWaterCounters(Set<WaterMeter> waterCounterList) {
         this.waterCounterList = waterCounterList;
     }
 

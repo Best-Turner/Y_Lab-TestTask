@@ -3,7 +3,7 @@ package ru.ylab.util.impl;
 import ru.ylab.exception.UserNotFoundException;
 import ru.ylab.model.Role;
 import ru.ylab.model.User;
-import ru.ylab.model.WaterCounter;
+import ru.ylab.model.WaterMeter;
 import ru.ylab.service.UserService;
 import ru.ylab.util.UserValidator;
 
@@ -125,12 +125,12 @@ public class UserValidatorImpl implements UserValidator {
     }
 
     @Override
-    public boolean addCounter(User user, WaterCounter waterCounter) {
+    public boolean addCounter(User user, WaterMeter waterCounter) {
         return userService.addWaterCounter(user, waterCounter);
     }
 
     @Override
-    public List<WaterCounter> getWaterCounters(User owner) {
+    public List<WaterMeter> getWaterCounters(User owner) {
         return userService.waterCounters(owner);
     }
 

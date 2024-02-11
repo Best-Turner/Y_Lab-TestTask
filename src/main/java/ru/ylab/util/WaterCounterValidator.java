@@ -1,9 +1,10 @@
 package ru.ylab.util;
 
+import ru.ylab.model.MeterData;
 import ru.ylab.model.User;
-import ru.ylab.model.WaterCounter;
+import ru.ylab.model.WaterMeter;
 
-import java.util.Map;
+import java.util.List;
 import java.util.Set;
 
 public interface WaterCounterValidator {
@@ -11,13 +12,13 @@ public interface WaterCounterValidator {
 
     Float getCurrentValue(String serialNumber);
 
-    Map<String, Float> getHistoryValues(String serialNumber);
+    List<MeterData> getHistoryValues(String serialNumber);
 
     boolean transferData(String serialNumber, Float value);
 
     boolean delete(String serialNumber);
 
-    WaterCounter findWaterCounterBySerialNumber(String serialNumber);
+    WaterMeter findWaterCounterBySerialNumber(String serialNumber);
 
-    Set<WaterCounter> getWaterCounters();
+    Set<WaterMeter> getWaterCounters();
 }

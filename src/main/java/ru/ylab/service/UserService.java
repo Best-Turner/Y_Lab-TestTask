@@ -2,7 +2,7 @@ package ru.ylab.service;
 
 import ru.ylab.exception.UserNotFoundException;
 import ru.ylab.model.User;
-import ru.ylab.model.WaterCounter;
+import ru.ylab.model.WaterMeter;
 
 import java.util.List;
 
@@ -61,7 +61,7 @@ public interface UserService {
      * @return true if added.
      */
 
-    boolean addWaterCounter(User user, WaterCounter waterCounter);
+    boolean addWaterCounter(User user, WaterMeter waterCounter);
 
-    List<WaterCounter> waterCounters(User owner);
+    List<WaterMeter> waterCounters(User owner);
 }

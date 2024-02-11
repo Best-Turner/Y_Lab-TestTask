@@ -1,7 +1,10 @@
 package ru.ylab.repository;
 
-import ru.ylab.model.CounterDataStorage;
+import ru.ylab.model.MeterData;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -10,17 +13,15 @@ import java.util.Map;
  * adding values, checking existence, retrieving values, and deleting counters.
  */
 
-public class CounterDataStorageRepository {
-
-    private final CounterDataStorage dataStorage;
+public class MeterDataRepository {
+    private final Map<String, Map<String, Float>> storage;
+    private Map<String, Float> values;
 
     /**
-     * Constructs a new `CounterDataStorageRepository` with the specified `CounterDataStorage`.
-     *
-     * @param counterDataStorage The `CounterDataStorage` instance to be used by the repository.
+     * Constructs a new 'MeterDataRepository'
      */
-    public CounterDataStorageRepository(CounterDataStorage counterDataStorage) {
-        this.dataStorage = counterDataStorage;
+    public MeterDataRepository() {
+        storage = new HashMap<>();
     }
 
     /**
@@ -28,19 +29,21 @@ public class CounterDataStorageRepository {
      *
      * @param serialNumber The serial number of the water counter to register.
      */
-    public void registrationWaterCounter(String serialNumber) {
-        dataStorage.registerWaterCounter(serialNumber);
+    public void registrationWaterMeter(String serialNumber) {
+        values = new HashMap<>();
+        storage.put(serialNumber, values);
     }
 
     /**
-     * Adds a value for a specific date to the data storage associated with a water counter.
+     * Adds a new MeterData for a specific date to the storage associated with a water counter.
      *
-     * @param serialNumber The serial number of the water counter.
-     * @param date         The date for which the value is added.
-     * @param value        The value to be added.
+     * @param meterData The data about water meter.
      */
-    public void addValue(String serialNumber, String date, Float value) {
-        dataStorage.addValue(serialNumber, date, value);
+    public void addValue(MeterData meterData) {
+        String serialNumberMeterWater = meterData.getSerialNumberMeterWater();
+        String date = meterData.getDate();
+        float value = meterData.getValue();
+        storage.get(serialNumberMeterWater).put(date, value);
     }
 
     /**
@@ -50,7 +53,7 @@ public class CounterDataStorageRepository {
      * @return True if the water counter exists, false otherwise.
      */
     public boolean isExist(String serialNumber) {
-        return dataStorage.isRegistry(serialNumber);
+        return storage.containsKey(serialNumber);
     }
 
     /**
@@ -61,7 +64,7 @@ public class CounterDataStorageRepository {
      * @return The value associated with the specified serial number and date.
      */
     public Float getValue(String serialNumber, String dateKey) {
-        return dataStorage.getValueByDate(serialNumber, dateKey);
+        return storage.get(serialNumber).get(dateKey);
     }
 
     /**
@@ -70,8 +73,13 @@ public class CounterDataStorageRepository {
      * @param serialNumber The serial number of the water counter.
      * @return A map of all values associated with the specified water counter.
      */
-    public Map<String, Float> getValues(String serialNumber) {
-        return dataStorage.getValuesWithDate(serialNumber);
+    public List<MeterData> getValues(String serialNumber) {
+        List<MeterData> meterData = new ArrayList<>();
+        ;
+        for (Map.Entry<String, Float> data : storage.get(serialNumber).entrySet()) {
+            meterData.add(new MeterData(serialNumber, data.getKey(), data.getValue()));
+        }
+        return meterData;
     }
 
     /**
@@ -81,6 +89,6 @@ public class CounterDataStorageRepository {
      * @return True if the deletion was successful, false otherwise.
      */
     public boolean delete(String serialNumber) {
-        return dataStorage.deleteWaterCounterAndData(serialNumber);
+        return storage.remove(serialNumber).isEmpty();
     }
 }

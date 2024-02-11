@@ -2,13 +2,13 @@ package ru.ylab;
 
 import ru.ylab.app.in.ConsoleServiceMediator;
 import ru.ylab.model.*;
-import ru.ylab.repository.CounterDataStorageRepository;
+import ru.ylab.repository.MeterDataRepository;
 import ru.ylab.repository.UserRepository;
 import ru.ylab.repository.WaterCounterRepository;
-import ru.ylab.service.CounterDataStorageService;
+import ru.ylab.service.MeterDataService;
 import ru.ylab.service.UserService;
 import ru.ylab.service.WaterCounterService;
-import ru.ylab.service.impl.CounterDataStorageServiceImpl;
+import ru.ylab.service.impl.MeterDataServiceImpl;
 import ru.ylab.service.impl.UserServiceImpl;
 import ru.ylab.service.impl.WaterCounterServiceImpl;
 import ru.ylab.util.UserValidator;
@@ -30,16 +30,16 @@ import java.util.Map;
 public class Main {
 
     public static void main(String[] args) {
-        Map<String, WaterCounter> counterMap = new HashMap<>();
+        Map<String, WaterMeter> counterMap = new HashMap<>();
         Map<String, User> userMap = new HashMap<>();
 
         User admin = new User(1L, "Admin", "admin@mail.ru", "1234", Role.ADMIN);
         User user = new User(2L, "User", "user@mail.ru", "1234", Role.USER);
 
-        WaterCounter counter1 = new WaterCounter(1L, "H-1234", CounterType.HOT, 123f, admin);
-        WaterCounter counter2 = new WaterCounter(2L, "C-4321", CounterType.COLD, 321f, user);
+        WaterMeter counter1 = new WaterMeter(1L, "H-1234", CounterType.HOT, 123f, admin);
+        WaterMeter counter2 = new WaterMeter(2L, "C-4321", CounterType.COLD, 321f, user);
         admin.setWaterCounters(new HashSet<>());
-        user.setWaterCounters(new HashSet<>()); //newUser@mail.ru  1234
+        user.setWaterCounters(new HashSet<>());
         admin.getWaterCounterList().add(counter1);
         user.getWaterCounterList().add(counter2);
 
@@ -53,17 +53,18 @@ public class Main {
         UserService userService = new UserServiceImpl(userRepository);
         UserValidator userValidator = new UserValidatorImpl(userService);
         WaterCounterRepository counterRepository = new WaterCounterRepository(counterMap);
-        CounterDataStorage dataStorage = CounterDataStorage.getInstance();
-        CounterDataStorageRepository dataStorageRepository = new CounterDataStorageRepository(dataStorage);
-        CounterDataStorageService dataStorageService = new CounterDataStorageServiceImpl(dataStorageRepository);
+
+        MeterDataRepository meterDataRepository = new MeterDataRepository();
+        MeterDataService dataStorageService = new MeterDataServiceImpl(meterDataRepository);
         WaterCounterService counterService = new WaterCounterServiceImpl(counterRepository, dataStorageService);
         WaterCounterValidator counterValidator = new WaterCounterValidatorImpl(counterService);
         ConsoleServiceMediator console = new ConsoleServiceMediator(userValidator, counterValidator);
+        meterDataRepository.registrationWaterMeter("H-1234");
+        meterDataRepository.registrationWaterMeter("C-4321");
 
-        dataStorage.registerWaterCounter("H-1234");
-        dataStorage.registerWaterCounter("C-4321");
-        dataStorage.addValue("H-1234", "2023-12", 123f);
-        dataStorage.addValue("C-4321", "2024-1", 321f);
+        meterDataRepository.addValue(new MeterData("H-1234", "2023-12", 123f));
+        meterDataRepository.addValue(new MeterData("C-4321", "2024-1", 321f));
+
 
         while (true) {
             User user1 = console.processStartPageCommand();
