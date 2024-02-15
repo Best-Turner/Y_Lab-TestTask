@@ -31,7 +31,7 @@ public class DBConnector {
     }
 
     public Connection getConnection() {
-        String[] properties = getProperties("application.properties");
+        String[] properties = getProperties("liquibase.properties");
 
         try (Connection connection = DriverManager.getConnection(properties[0], properties[1], properties[2])) {
             System.out.println("Соединение установленно");

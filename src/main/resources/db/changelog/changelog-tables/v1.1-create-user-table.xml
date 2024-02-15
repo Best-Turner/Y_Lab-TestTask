@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="1.1.1 create schema 'model" author="Aleksandr">
+        <sql>CREATE SCHEMA IF NOT EXISTS model</sql>
+    </changeSet>
+
+    <changeSet id="1.1.2 create table 'users'" author="Aleksandr">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists schemaName="model" tableName="users"/>
+            </not>
+        </preConditions>
+        <sql>CREATE TYPE 'role' AS enum ('ADMIN', 'USER')</sql>
+
+        <createTable tableName="users" schemaName="model" catalogName="catalog1">
+            <column name="id" type="BIGINT" autoIncrement="true">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="name" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="varcher(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="password" type="varchar(100)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="role" type="role">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet author="Aleksandr" id="1.1.3 add Auto Increment">
+        <addAutoIncrement catalogName="catalog1"
+                          columnDataType="int"
+                          columnName="id"
+                          defaultOnNull="false"
+                          generationType="ALWAYS"
+                          incrementBy="1"
+                          schemaName="model"
+                          startWith="100"
+                          tableName="users"/>
+    </changeSet>
+</databaseChangeLog>
