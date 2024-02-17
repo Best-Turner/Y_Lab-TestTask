@@ -67,7 +67,7 @@ public class ConsoleServiceMediator {
         AuditLogger.log("Admin has entered the main menu");
         printMainMenuForUser();
         System.out.println("\t\t" + COMMAND_THREE + USERS);
-        System.out.println("\t\t" + COMMAND_ZERO + " - to exit");
+        System.out.println("\t\t" + COMMAND_ZERO + " - Exit");
 
     }
 
@@ -202,7 +202,7 @@ public class ConsoleServiceMediator {
             return;
         }
         AuditLogger.log("Get user information with id = " + index);
-        User user = users.get(index - 1);
+        User user = userValidator.getById(index);
         System.out.println("List of user water meters with id " + user.getId());
         getListWaterCounters(user);
         getCounterById(userValidator.getWaterCounters(user));
@@ -210,7 +210,6 @@ public class ConsoleServiceMediator {
 
 
     private List<WaterMeter> getListWaterCounters(User owner) {
-        int id = 1;
         List<WaterMeter> waterCounters = userValidator.getWaterCounters(owner);
         StringBuilder printInfoAboutCounter = new StringBuilder();
         for (WaterMeter counter : waterCounters) {
@@ -218,7 +217,7 @@ public class ConsoleServiceMediator {
             printInfoAboutCounter
                     .append("~~~~~~~~~~~~~~~~~~~~~~~~~~~~\n")
                     .append("ID - ")
-                    .append(id++)
+                    .append(counter.getId())
                     .append("\n\tSerialNumber - ")
                     .append(counter.getSerialNumber())
                     .append("\n\tType: ")
@@ -258,19 +257,22 @@ public class ConsoleServiceMediator {
         System.out.println(COMMAND_BACK);
         String command = readUserCommand();
         AuditLogger.log("Get info about water counter with id = " + command);
-        int index;
+        int inputCommand;
         try {
-            index = Integer.parseInt(command);
+            inputCommand = Integer.parseInt(command);
         } catch (NumberFormatException e) {
             AuditLogger.log(WRONG_COMMAND);
             System.out.println(WRONG_COMMAND);
             return;
         }
-        if (index == 0 || index > waterCounters.size()) {
-            AuditLogger.log("Exit");
-            return;
-        }
-        WaterMeter counterById = waterCounters.get(index - 1);
+//        if (index == 0 || index > waterCounters.size()) {
+//            AuditLogger.log("Exit");
+//            return;
+//        }
+        WaterMeter counterById = counterValidator.getOneWaterMeter(inputCommand);
+        //List<MeterData> historyValues = counterValidator.getHistoryValues(inputCommand);
+        //WaterMeter counterById = waterCounters.get(inputCommand - 1);
+
         getInfoAboutCounter(counterById);
 
     }
@@ -293,7 +295,7 @@ public class ConsoleServiceMediator {
             }
             case COMMAND_THREE -> {
                 AuditLogger.log("Show values");
-                printValues(counter.getSerialNumber());
+                printValues(counter.getId());
             }
             case COMMAND_BACK -> {
                 AuditLogger.log("Exit");
@@ -323,9 +325,9 @@ public class ConsoleServiceMediator {
         counterValidator.transferData(counter.getSerialNumber(), newValue);
     }
 
-    private void printValues(String serialNumber) {
-        List<MeterData> historyValues = counterValidator.getHistoryValues(serialNumber);
-        System.out.println("History values for water counter with serial number - " + serialNumber);
+    private void printValues(long waterMeterId) {
+        List<MeterData> historyValues = counterValidator.getHistoryValues(waterMeterId);
+        System.out.println("History values for water counter with ID - " + waterMeterId);
         for (MeterData data : historyValues) {
             System.out.println("\tDate: " + data.getDate() + "\n\tValue: " + data.getValue());
             System.out.println("~~~~~~~~~~~~~~~~~");

@@ -14,11 +14,11 @@ public class WaterCounterServiceImpl implements WaterCounterService {
 
     private final WaterCounterRepository repository;
 
-    private final MeterDataService storageService;
+    private final MeterDataService meterDataService;
 
     public WaterCounterServiceImpl(WaterCounterRepository repository, MeterDataService counterDataStorageService) {
         this.repository = repository;
-        this.storageService = counterDataStorageService;
+        this.meterDataService = counterDataStorageService;
     }
 
 
@@ -26,7 +26,7 @@ public class WaterCounterServiceImpl implements WaterCounterService {
     public void save(WaterMeter waterCounter) {
         if (!repository.isExist(waterCounter.getSerialNumber())) {
             repository.addWaterCounter(waterCounter);
-            storageService.registrationCounter(waterCounter);
+            meterDataService.registrationCounter(waterCounter);
         }
     }
 
@@ -42,55 +42,41 @@ public class WaterCounterServiceImpl implements WaterCounterService {
     }
 
     @Override
-    public Set<WaterMeter> allWaterCounter() {
-        Set<WaterMeter> waterCounters = new HashSet<>();
-        Map<String, WaterMeter> allWaterCounters = repository.getAllWaterCounters();
-        if (!allWaterCounters.isEmpty()) {
-            for (Map.Entry<String, WaterMeter> entry : allWaterCounters.entrySet()) {
-                waterCounters.add(entry.getValue());
-            }
-            return waterCounters;
+    public List<WaterMeter> allWaterCounter() {
+        List<WaterMeter> allWaterCounters = repository.getAllWaterCounters();
+        if (allWaterCounters.isEmpty()) {
+           return Collections.emptyList();
         }
-        return Collections.emptySet();
+        return allWaterCounters;
     }
 
     @Override
     public void transferData(String serialNumber, Float newValue) throws InvalidDataException, WaterCounterNotFoundException {
-        storageService.submitValue(getIdBySerialNumber(serialNumber), newValue);
+        meterDataService.submitValue(getIdBySerialNumber(serialNumber), newValue);
     }
 
-    @Override
-    public boolean delete(String serialNumber) {
-        if (!repository.isExist(serialNumber)) {
-            return false;
-        }
-        Long waterMeterId = repository.getWaterCounter(serialNumber).get().getId();
-        storageService.delete(waterMeterId);
-        repository.delete(serialNumber);
-        return true;
-    }
 
     @Override
     public Float currentValue(String serialNumber) throws WaterCounterNotFoundException {
         WaterMeter waterCounter = getWaterCounter(serialNumber);
-        return storageService.getCurrentValue(waterCounter.getId());
+        return meterDataService.getCurrentValue(waterCounter.getId());
     }
 
 
     @Override
     public Float getValueByDate(String serialNumber, String date) throws WaterCounterNotFoundException {
-        return storageService.getValueByDate(getIdBySerialNumber(serialNumber), date);
+        return meterDataService.getValueByDate(getIdBySerialNumber(serialNumber), date);
     }
 
     @Override
-    public List<MeterData> getValues(String serialNumber) throws WaterCounterNotFoundException {
-        return storageService.getValues(getIdBySerialNumber(serialNumber));
+    public List<MeterData> getValues(long waterMeterId) throws WaterCounterNotFoundException {
+        return meterDataService.getValues(waterMeterId);
     }
 
-    public boolean delete(WaterMeter waterCounter) {
-        return delete(waterCounter.getSerialNumber());
+    @Override
+    public WaterMeter getWaterCounter(long inputCommand) {
+        return repository.getWaterCounter(inputCommand);
     }
-
 
     private long getIdBySerialNumber(String serialNumber) throws WaterCounterNotFoundException {
         WaterMeter waterMeterNotFound = repository.getWaterCounter(serialNumber)

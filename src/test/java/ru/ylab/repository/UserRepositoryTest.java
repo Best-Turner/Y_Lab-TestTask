@@ -4,10 +4,10 @@ import org.junit.Before;
 import org.junit.Test;
 import ru.ylab.model.Role;
 import ru.ylab.model.User;
+import ru.ylab.util.DBConnector;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.sql.Connection;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -17,19 +17,23 @@ public class UserRepositoryTest {
     private final static Role ADMIN = Role.ADMIN;
     private final static String PASSWORD = "1234";
     private final static Long USER_ID = 1L;
+    private Connection connection;
     private User user;
     private User user1;
-    private Map<String, User> usersMap;
+    //private Map<String, User> usersMap;
+    private List<User> users;
     private UserRepository repository;
 
 
     @Before
     public void setUp() throws Exception {
-        usersMap = new HashMap<>();
+
+        users = new ArrayList<>();
         user = new User(USER_ID, NAME, EMAIL, PASSWORD, ADMIN);
-        user1 = new User(USER_ID + 1, NAME, EMAIL.replace("ru", "@com"), PASSWORD, Role.USER);
-        usersMap.put(EMAIL, user);
-        repository = new UserRepository(usersMap);
+        user1 = new User(USER_ID + 1, NAME, EMAIL.replace("@ru", "@com"), PASSWORD, Role.USER);
+        users.add(user);
+        connection = DBConnector.getConnection();
+        repository = new UserRepository(connection);
     }
 
     @Test
@@ -46,43 +50,26 @@ public class UserRepositoryTest {
 
     @Test
     public void whenSaveUniqueUserThenSizeMustBeIncrease() {
-        int actual = usersMap.size();
+        int actual = users.size();
         assertEquals(1, actual);
         repository.save(user1);
-        actual = usersMap.size();
+        actual = users.size();
         assertEquals(2, actual);
     }
 
     @Test
     public void whenSaveNotUniqueUserThenSizeShouldNotIncrease() {
-        int actual = usersMap.size();
+        int actual = users.size();
         assertEquals(1, actual);
         repository.save(user1);
-        actual = usersMap.size();
+        actual = users.size();
         assertEquals(2, actual);
         repository.save(user1);
         repository.save(user1);
-        actual = usersMap.size();
+        actual = users.size();
         assertEquals(2, actual);
     }
 
-    @Test
-    public void whenUpdateUserThenUserShouldBeChange() {
-        User actual = usersMap.get(EMAIL);
-        assertEquals(user, actual);
-        actual.setName("anotherName");
-        repository.update(EMAIL, user1);
-        assertNotEquals(user, user1);
-    }
-
-    @Test
-    public void whenDeleteExistUserThenSizeMustBeDecrease() {
-        int actual = usersMap.size();
-        assertEquals(1, actual);
-        repository.delete(user);
-        actual = usersMap.size();
-        assertEquals(0, actual);
-    }
 
     @Test
     public void whenUserExistThenReturnTrue() {
@@ -96,8 +83,8 @@ public class UserRepositoryTest {
 
     @Test
     public void whenGetUsersThenReturnMapUser() {
-        Map<String, User> actual = repository.userList();
-        assertEquals(HashMap.class, actual.getClass());
-        assertEquals(usersMap, actual);
+        List<User> actual= repository.usersGroup();
+        assertEquals(ArrayList.class, actual.getClass());
+        assertEquals(users, actual);
     }
 }

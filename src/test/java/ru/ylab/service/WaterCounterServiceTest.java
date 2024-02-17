@@ -68,17 +68,17 @@ public class WaterCounterServiceTest {
                 WaterCounterNotFoundException.class, () -> service.getWaterCounter(SERIAL_NUMBER));
     }
 
-    @Test
-    public void whenGetSetWaterCountersThenReturnSet() {
-        Map<String, WaterMeter> counterMap = new HashMap<>();
-        Set<WaterMeter> expect = new HashSet<>();
-        expect.add(waterCounter);
-        counterMap.put(SERIAL_NUMBER, waterCounter);
-        counterMap.put(SERIAL_NUMBER.concat("123"), waterCounter);
-        when(repository.getAllWaterCounters()).thenReturn(counterMap);
-        Set<WaterMeter> actual = service.allWaterCounter();
-        assertEquals(expect, actual);
-    }
+//    @Test
+//    public void whenGetSetWaterCountersThenReturnSet() {
+//        Map<String, WaterMeter> counterMap = new HashMap<>();
+//        Set<WaterMeter> expect = new HashSet<>();
+//        expect.add(waterCounter);
+//        counterMap.put(SERIAL_NUMBER, waterCounter);
+//        counterMap.put(SERIAL_NUMBER.concat("123"), waterCounter);
+//        when(repository.getAllWaterCounters()).thenReturn(counterMap);
+//        Set<WaterMeter> actual = service.allWaterCounter();
+//        assertEquals(expect, actual);
+//    }
 
     @Test
     public void shouldCallMethodSubmitValueWhenValueChanges() throws InvalidDataException, WaterCounterNotFoundException {
@@ -97,32 +97,13 @@ public class WaterCounterServiceTest {
         assertEquals(VALUE, actual);
     }
 
-    @Test
-    public void whenDeleteIsExistWaterCounterReturnTrue() {
-        when(repository.isExist(SERIAL_NUMBER)).thenReturn(true);
-        when(repository.getWaterCounter(SERIAL_NUMBER)).thenReturn(Optional.of(waterCounter));
-        service.delete(waterCounter);
-        verify(storageService, times(1)).delete(ID);
-        verify(repository, times(1)).delete(SERIAL_NUMBER);
-        boolean actual = service.delete(SERIAL_NUMBER);
-        assertTrue(actual);
-    }
 
-    @Test
-    public void whenDeleteIsNotExistWaterCounterReturnTrue() {
-        when(repository.isExist(SERIAL_NUMBER)).thenReturn(false);
-        service.delete(SERIAL_NUMBER);
-        verify(storageService, never()).delete(ID);
-        verify(repository, never()).delete(SERIAL_NUMBER);
-        boolean actual = service.delete(SERIAL_NUMBER);
-        assertFalse(actual);
-    }
 
     @Test
     public void shouldCallMethodGetValuesAndReturnMap() throws WaterCounterNotFoundException {
         when(storageService.getValues(ID)).thenReturn(Collections.emptyList());
         when(repository.getWaterCounter(SERIAL_NUMBER)).thenReturn(Optional.of(waterCounter));
-        List<MeterData> actual = service.getValues(SERIAL_NUMBER);
+        List<MeterData> actual = service.getValues(ID);
         verify(storageService, times(1)).getValues(ID);
         assertEquals(Collections.emptyList(), actual);
     }

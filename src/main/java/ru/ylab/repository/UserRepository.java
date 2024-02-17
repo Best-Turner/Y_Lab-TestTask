@@ -1,11 +1,15 @@
 package ru.ylab.repository;
 
+import ru.ylab.model.CounterType;
+import ru.ylab.model.Role;
 import ru.ylab.model.User;
 import ru.ylab.model.WaterMeter;
 
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * The `UserRepository` class represents a repository for managing user data and associated operations.
@@ -14,15 +18,17 @@ import java.util.Set;
  */
 public class UserRepository {
 
-    private final Map<String, User> users;
+    private final Connection connection;
+    private PreparedStatement preparedStatement;
+    private String sql;
 
     /**
      * Constructs a new `UserRepository` with the given map of users.
      *
-     * @param userMap The initial map of users to be used in the repository.
+     * @param connection
      */
-    public UserRepository(Map<String, User> userMap) {
-        this.users = userMap;
+    public UserRepository(Connection connection) {
+        this.connection = connection;
     }
 
     /**
@@ -32,7 +38,37 @@ public class UserRepository {
      * @return An Optional containing the user with the given email, or empty if not found.
      */
     public Optional<User> getUser(String email) {
-        return Optional.ofNullable(users.get(email));
+        User userFromDb = null;
+        sql = "SELECT * FROM model.users WHERE email = ?";
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, email);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                userFromDb = userFromIncomingDatabaseData(resultSet);
+            }
+            preparedStatement.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return Optional.ofNullable(userFromDb);
+    }
+
+    public User getUser(long id) {
+        User userFromDb = null;
+        sql = "SELECT * FROM model.users u WHERE u.id = ?";
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setLong(1, id);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                userFromDb = userFromIncomingDatabaseData(resultSet);
+            }
+            preparedStatement.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return userFromDb;
     }
 
     /**
@@ -41,18 +77,22 @@ public class UserRepository {
      * @param user The user to be saved.
      */
     public void save(User user) {
-        users.put(user.getEmail(), user);
+        sql = "INSERT INTO model.users (name, email, password, role) VALUES(?,?,?,?)";
+        try {
+            connection.setAutoCommit(true);
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, user.getName());
+            preparedStatement.setString(2, user.getEmail());
+            preparedStatement.setString(3, user.getPassword());
+            preparedStatement.setObject(4, user.getRole(),Types.OTHER);
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e); //test@mail.ru
+        }
     }
 
-    /**
-     * Updates the user information with the specified email.
-     *
-     * @param email The email address of the user to be updated.
-     * @param user  The updated user information.
-     */
-    public void update(String email, User user) {
-        users.put(email, user);
-    }
+
 
     /**
      * Deletes a user from the repository.
@@ -61,8 +101,19 @@ public class UserRepository {
      * @return True if the deletion was successful, false otherwise.
      */
     public boolean delete(User user) {
-        users.remove(user.getEmail());
-        return true;
+        sql = "DELETE FROM model.users WHERE id = " + user.getId();
+        boolean executeResult = false;
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                executeResult = resultSet.getBoolean(1);
+            }
+            preparedStatement.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return executeResult;
     }
 
     /**
@@ -72,7 +123,20 @@ public class UserRepository {
      * @return True if the user exists, false otherwise.
      */
     public boolean isExist(String email) {
-        return users.containsKey(email);
+        boolean executeResult = false;
+        sql = "SELECT EXISTS(SELECT 1 FROM model.users WHERE email = ?)";
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, email);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                executeResult = resultSet.getBoolean(1);
+            }
+            preparedStatement.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return executeResult;
     }
 
     /**
@@ -80,28 +144,74 @@ public class UserRepository {
      *
      * @return The map of users in the repository.
      */
-    public Map<String, User> userList() {
+    public List<User> usersGroup() {
+        List<User> users = new ArrayList<>();
+        sql = "SELECT * FROM model.users";
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                users.add(userFromIncomingDatabaseData(resultSet));
+            }
+            preparedStatement.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
         return users;
     }
 
     /**
      * Retrieves the set of water counters associated with a user.
      *
-     * @param email The email address of the user.
+     * @param ownerId The id address of the user.
      * @return The set of water counters associated with the user.
      */
-    public Set<WaterMeter> getWaterCounters(String email) {
-        Set<WaterMeter> waterCounterList = users.get(email).getWaterCounterList();
-        return waterCounterList;
+    public List<WaterMeter> getWaterCounters(long ownerId) {
+        List<WaterMeter> meters = new ArrayList<>();
+        sql = "SELECT * FROM model.water_meters w WHERE w.owner = ?";
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setLong(1, ownerId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                long id = resultSet.getLong("id");
+                String serialNumber = resultSet.getString("serial_number");
+                String typeFromDb = resultSet.getString("type");
+                CounterType type = CounterType.valueOf(typeFromDb);
+                float value = resultSet.getFloat("current_value");
+                meters.add(new WaterMeter(id, serialNumber, type, value, null));
+            }
+            preparedStatement.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        //Set<WaterMeter> waterCounterList = users.get(email).getWaterCounterList();
+        return meters;
     }
 
-    /**
-     * Adds a water counter to the list of water counters associated with a user.
-     *
-     * @param email        The email address of the user.
-     * @param waterCounter The water counter to be added.
-     */
-    public void addWaterCounterToUser(String email, WaterMeter waterCounter) {
-        users.get(email).getWaterCounterList().add(waterCounter);
+//    /**
+//     * Adds a water counter to the list of water counters associated with a user.
+//     *
+//     * @param email        The email address of the user.
+//     * @param waterCounter The water counter to be added.
+//     */
+//    public void addWaterCounterToUser(String email, WaterMeter waterCounter) {
+//        users.get(email).getWaterCounterList().add(waterCounter);
+//    }
+
+    private User userFromIncomingDatabaseData(ResultSet resultSet) {
+        User userFromDb = null;
+        try {
+                long id = resultSet.getLong("id");
+                String name = resultSet.getString("name");
+                String emailFromDb = resultSet.getString("email");
+                String password = resultSet.getString("password");
+                String roleFromDb = resultSet.getString("role");
+                Role role = Role.valueOf(roleFromDb);
+                userFromDb = new User(id, name, emailFromDb, password, role);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return userFromDb;
     }
 }

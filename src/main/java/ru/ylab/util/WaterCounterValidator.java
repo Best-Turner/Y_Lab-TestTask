@@ -12,13 +12,12 @@ public interface WaterCounterValidator {
 
     Float getCurrentValue(String serialNumber);
 
-    List<MeterData> getHistoryValues(String serialNumber);
+    List<MeterData> getHistoryValues(long waterMeterId);
 
     boolean transferData(String serialNumber, Float value);
 
-    boolean delete(String serialNumber);
 
-    WaterMeter findWaterCounterBySerialNumber(String serialNumber);
+    List<WaterMeter> getWaterCounters();
 
-    Set<WaterMeter> getWaterCounters();
+    WaterMeter getOneWaterMeter(long inputCommand);
 }

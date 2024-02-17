@@ -1,8 +1,14 @@
 package ru.ylab.repository;
 
+import ru.ylab.model.CounterType;
 import ru.ylab.model.WaterMeter;
 
-import java.util.Map;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -13,15 +19,17 @@ import java.util.Optional;
 
 public class WaterCounterRepository {
 
-    private final Map<String, WaterMeter> waterCounters;
+    private final Connection connection;
+    private PreparedStatement preparedStatement;
+    private String sql;
 
     /**
      * Constructs a new `WaterCounterRepository` with the given map of water counters.
      *
-     * @param waterCounter The initial map of water counters to be used in the repository.
+     * @param connection
      */
-    public WaterCounterRepository(Map<String, WaterMeter> waterCounter) {
-        this.waterCounters = waterCounter;
+    public WaterCounterRepository(Connection connection) {
+        this.connection = connection;
     }
 
     /**
@@ -31,7 +39,19 @@ public class WaterCounterRepository {
      * @return An Optional containing the water counter with the given serial number, or empty if not found.
      */
     public Optional<WaterMeter> getWaterCounter(String serialNumber) {
-        return Optional.ofNullable(waterCounters.get(serialNumber));
+        sql = "SELECT * FROM model.water_meters WHERE serial_number = ?";
+        WaterMeter waterMeterFromDb = null;
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, serialNumber);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                waterMeterFromDb = waterMeterFromIncomingDatabaseData(resultSet);
+            }
+            return Optional.ofNullable(waterMeterFromDb);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -40,40 +60,21 @@ public class WaterCounterRepository {
      * @param waterCounter The water counter to be added.
      */
     public void addWaterCounter(WaterMeter waterCounter) {
-        waterCounters.put(waterCounter.getSerialNumber(), waterCounter);
+        sql = "INSERT INTO model_meters(serial_number, type, current_value, owner) VALUES(?,?,?,?)";
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, waterCounter.getSerialNumber());
+            preparedStatement.setString(2, waterCounter.getType().toString());
+            preparedStatement.setFloat(3, waterCounter.getCurrentValue());
+            preparedStatement.setLong(4, waterCounter.getOwner().getId());
+            preparedStatement.execute();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
-    /**
-     * Updates the information of an existing water counter with the specified serial number.
-     *
-     * @param serialNumber The serial number of the water counter to be updated.
-     * @param waterCounter The updated water counter information.
-     */
-    public void update(String serialNumber, WaterMeter waterCounter) {
-        waterCounters.replace(serialNumber, waterCounter);
-    }
-
-    /**
-     * Deletes a water counter from the repository.
-     *
-     * @param waterCounter The water counter to be deleted.
-     * @return True if the deletion was successful, false otherwise.
-     */
-    public boolean delete(WaterMeter waterCounter) {
-        waterCounters.remove(waterCounter.getSerialNumber());
-        return true;
-    }
-
-    /**
-     * Deletes a water counter from the repository using its serial number.
-     *
-     * @param serialNumber The serial number of the water counter to be deleted.
-     * @return True if the deletion was successful, false otherwise.
-     */
-    public boolean delete(String serialNumber) {
-        waterCounters.remove(serialNumber);
-        return true;
-    }
 
     /**
      * Checks if a water counter with the specified serial number exists in the repository.
@@ -82,7 +83,20 @@ public class WaterCounterRepository {
      * @return True if the water counter exists, false otherwise.
      */
     public boolean isExist(String serialNumber) {
-        return waterCounters.containsKey(serialNumber);
+        boolean executeResult = false;
+        sql = "SELECT EXISTS(SELECT 1 FROM model.water_meters w WHERE w.serial_number = ?)";
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, serialNumber);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                executeResult = resultSet.getBoolean(1);
+            }
+            preparedStatement.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return executeResult;
     }
 
     /**
@@ -90,7 +104,51 @@ public class WaterCounterRepository {
      *
      * @return The map of water counters in the repository.
      */
-    public Map<String, WaterMeter> getAllWaterCounters() {
-        return waterCounters;
+    public List<WaterMeter> getAllWaterCounters() {
+        List<WaterMeter> waterMeters = new ArrayList<>();
+        sql = "SELECT * FROM model.water_meters";
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                waterMeters.add(waterMeterFromIncomingDatabaseData(resultSet));
+            }
+            preparedStatement.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return waterMeters;
     }
+
+    public WaterMeter getWaterCounter(long inputCommand) {
+        sql = "SELECT * FROM model.water_meters wm WHERE wm.id = ?";
+        WaterMeter waterMeterFromDb = null;
+
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setLong(1, inputCommand);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                waterMeterFromDb = waterMeterFromIncomingDatabaseData(resultSet);
+            }
+            preparedStatement.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return waterMeterFromDb;
+    }
+
+    private WaterMeter waterMeterFromIncomingDatabaseData(ResultSet resultSet) {
+        try {
+            long id = resultSet.getLong("id");
+            String serialNumber = resultSet.getString("serial_number");
+            CounterType type = CounterType.valueOf(resultSet.getString("type"));
+            float value = resultSet.getFloat("current_value");
+            return new WaterMeter(id, serialNumber, type, value, null);
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+
 }

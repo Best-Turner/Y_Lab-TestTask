@@ -2,8 +2,11 @@ package ru.ylab.repository;
 
 import ru.ylab.model.MeterData;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,24 +17,16 @@ import java.util.Map;
  */
 
 public class MeterDataRepository {
-    private final Map<Long, Map<String, Float>> storage;
-    private Map<String, Float> values;
+
+    private final Connection connection;
+    private PreparedStatement preparedStatement;
+    private String sql;
 
     /**
      * Constructs a new 'MeterDataRepository'
      */
-    public MeterDataRepository() {
-        storage = new HashMap<>();
-    }
-
-    /**
-     * Registers a water counter with the given serial number.
-     *
-     * @param waterMeterId The id of the water meter to register.
-     */
-    public void registrationWaterMeter(long waterMeterId) {
-        values = new HashMap<>();
-        storage.put(waterMeterId, values);
+    public MeterDataRepository(Connection connection) {
+        this.connection = connection;
     }
 
     /**
@@ -40,10 +35,20 @@ public class MeterDataRepository {
      * @param meterData The data about water meter.
      */
     public void addValue(MeterData meterData) {
-        long waterMeterId = meterData.getWaterMeterId();
-        String date = meterData.getDate();
-        float value = meterData.getValue();
-        storage.get(waterMeterId).put(date, value);
+        sql = "INSERT INTO model.meter_data(water_id, date, value) VALUES(?,?,?)";
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            long waterMeterId = meterData.getWaterMeterId();
+            String date = meterData.getDate();
+            float value = meterData.getValue();
+            preparedStatement.setLong(1, waterMeterId);
+            preparedStatement.setString(2, date);
+            preparedStatement.setFloat(3, value);
+            preparedStatement.executeUpdate();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     /**
@@ -53,7 +58,20 @@ public class MeterDataRepository {
      * @return True if the water counter exists, false otherwise.
      */
     public boolean isExist(long waterMeterId) {
-        return storage.containsKey(waterMeterId);
+        boolean executeResult = false;
+        sql = "SELECT EXISTS(SELECT 1 FROM model.meter_data md WHERE md.water_id = ?)";
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setLong(1, waterMeterId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                executeResult = resultSet.getBoolean(1);
+            }
+            preparedStatement.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return executeResult;
     }
 
     /**
@@ -64,7 +82,21 @@ public class MeterDataRepository {
      * @return The value associated with the specified serial number and date.
      */
     public Float getValue(long waterMeterId, String dateKey) {
-        return storage.get(waterMeterId).get(dateKey);
+        float valueFromDb = 0;
+        sql = "SELECT * FROM model.meter_data md WHERE md.water_id = ? and md.date = ?";
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setLong(1, waterMeterId);
+            preparedStatement.setString(2, dateKey);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            if (resultSet.next()) {
+                valueFromDb = resultSet.getFloat(1);
+            }
+            preparedStatement.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return valueFromDb;
     }
 
     /**
@@ -73,11 +105,22 @@ public class MeterDataRepository {
      * @param waterMeterId The id of the water counter.
      * @return A map of all values associated with the specified water counter.
      */
-    public List<MeterData> getValues(long waterMeterId) {
+    public List<MeterData> getValuesByWaterMeterId(long waterMeterId) {
         List<MeterData> meterData = new ArrayList<>();
-
-        for (Map.Entry<String, Float> data : storage.get(waterMeterId).entrySet()) {
-            meterData.add(new MeterData(waterMeterId, data.getKey(), data.getValue()));
+        sql = "SELECT * FROM model.meter_data md WHERE md.water_id = ?";
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setLong(1, waterMeterId);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            while (resultSet.next()) {
+                long id = resultSet.getLong("water_id");
+                String date = resultSet.getString("date");
+                float value = resultSet.getFloat("value");
+                meterData.add(new MeterData(id, date, value));
+            }
+            preparedStatement.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
         }
         return meterData;
     }
@@ -89,6 +132,16 @@ public class MeterDataRepository {
      * @return True if the deletion was successful, false otherwise.
      */
     public boolean delete(long waterMeterId) {
-        return storage.remove(waterMeterId).isEmpty();
+        sql = "DELETE FROM model.meter_date md WHERE md.water_id = ?";
+        int result;
+        try {
+            preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setLong(1, waterMeterId);
+            result = preparedStatement.executeUpdate();
+            preparedStatement.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+        return result > 0;
     }
 }

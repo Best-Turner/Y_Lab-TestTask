@@ -12,6 +12,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository repository;
 
+
     public UserServiceImpl(UserRepository repository) {
         this.repository = repository;
     }
@@ -33,16 +34,11 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<User> allUsers() {
-        Map<String, User> userMap = repository.userList();
-        if (!userMap.isEmpty()) {
-            List<User> users = new ArrayList<>();
-
-            for (Map.Entry<String, User> entry : userMap.entrySet()) {
-                users.add(entry.getValue());
-            }
-            return users;
+        List<User> users = repository.usersGroup();
+        if (users.isEmpty()) {
+            return Collections.emptyList();
         }
-        return Collections.emptyList();
+        return users;
     }
 
     @Override
@@ -78,22 +74,28 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<WaterMeter> waterCounters(User owner) {
-        List<WaterMeter> list = new ArrayList<>();
-        String email = owner.getEmail();
-        Set<WaterMeter> waterCounters = repository.getWaterCounters(email);
-        waterCounters.forEach(list::add);
-        return list;
+
+        List<WaterMeter> waterCounters = repository.getWaterCounters(owner.getId());
+        if (waterCounters.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return waterCounters;
     }
 
     @Override
-    public boolean addWaterCounter(User user, WaterMeter waterCounter) {
-        String email = user.getEmail();
-        Set<WaterMeter> waterCounters = repository.getWaterCounters(email);
-        if (waterCounters.contains(waterCounter)) {
-            return false;
-        }
-        repository.addWaterCounterToUser(user.getEmail(), waterCounter);
-        return true;
+    public User getUserById(int index) {
+        return repository.getUser(index);
     }
+
+//    @Override
+//    public boolean addWaterCounter(User user, WaterMeter waterCounter) {
+//        String email = user.getEmail();
+//        Set<WaterMeter> waterCounters = repository.getWaterCounters(email);
+//        if (waterCounters.contains(waterCounter)) {
+//            return false;
+//        }
+//        repository.addWaterCounterToUser(user.getEmail(), waterCounter);
+//        return true;
+//    }
 
 }

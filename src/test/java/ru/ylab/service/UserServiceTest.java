@@ -72,10 +72,10 @@ public class UserServiceTest {
 
     @Test
     public void whenGetUserListThewReturnUserList() {
-        when(repository.userList()).thenReturn(Collections.emptyMap());
-        verify(repository, never()).userList();
+        when(repository.usersGroup()).thenReturn(Collections.emptyList());
+        verify(repository, never()).usersGroup();
         service.allUsers();
-        verify(repository, times(1)).userList();
+        verify(repository, times(1)).usersGroup();
 
     }
 

@@ -48,7 +48,7 @@ public class MeterDataServiceImpl implements MeterDataService {
     public void registrationCounter(WaterMeter waterCounter) {
         Long id = waterCounter.getId();
         Float value = waterCounter.getCurrentValue();
-        repository.registrationWaterMeter(id);
+        //repository.registrationWaterMeter(id);
         repository.addValue(new MeterData(id, getKeyFromDate(now()), value));
     }
 
@@ -127,7 +127,7 @@ public class MeterDataServiceImpl implements MeterDataService {
         if (!isRegistrInStorage(waterMeterId)) {
             return Collections.emptyList();
         }
-        return repository.getValues(waterMeterId);
+        return repository.getValuesByWaterMeterId(waterMeterId);
     }
 
     /**
@@ -172,7 +172,7 @@ public class MeterDataServiceImpl implements MeterDataService {
      * @return The last recorded value.
      */
     private Float findLastValue(long waterMeterId) {
-        List<MeterData> data = repository.getValues(waterMeterId);
+        List<MeterData> data = repository.getValuesByWaterMeterId(waterMeterId);
         LocalDate lastDateDataTransfer = getLastDateTransfer(data);
         String keyFromDate = getKeyFromDate(lastDateDataTransfer);
         if (keyFromDate == null) {
@@ -204,7 +204,7 @@ public class MeterDataServiceImpl implements MeterDataService {
 
     private boolean canChangeDate(long waterMeterId) {
 
-        List<MeterData> data = repository.getValues(waterMeterId);
+        List<MeterData> data = repository.getValuesByWaterMeterId(waterMeterId);
         LocalDate lastDateTransfer = getLastDateTransfer(data);
         if (lastDateTransfer == null) {
             return true;

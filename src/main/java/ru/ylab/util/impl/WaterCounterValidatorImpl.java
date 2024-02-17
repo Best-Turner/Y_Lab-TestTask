@@ -62,10 +62,10 @@ public class WaterCounterValidatorImpl implements WaterCounterValidator {
     }
 
     @Override
-    public List<MeterData> getHistoryValues(String serialNumber) {
+    public List<MeterData> getHistoryValues(long waterMeterId) {
         List<MeterData> meterData = Collections.emptyList();
         try {
-            meterData = service.getValues(serialNumber);
+            meterData = service.getValues(waterMeterId);
         } catch (WaterCounterNotFoundException e) {
             System.out.println(e.getMessage());
         }
@@ -88,29 +88,14 @@ public class WaterCounterValidatorImpl implements WaterCounterValidator {
     }
 
     @Override
-    public boolean delete(String serialNumber) {
-        if (validateSerialNumber(serialNumber)) {
-            return false;
-        }
-        return service.delete(serialNumber);
-    }
-
-    @Override
-    public WaterMeter findWaterCounterBySerialNumber(String serialNumber) {
-        if (validateSerialNumber(serialNumber)) {
-            return null;
-        }
-        try {
-            return service.getWaterCounter(serialNumber);
-        } catch (WaterCounterNotFoundException e) {
-            System.out.println(e.getMessage());
-        }
-        return null;
-    }
-
-    @Override
-    public Set<WaterMeter> getWaterCounters() {
+    public List<WaterMeter> getWaterCounters() {
         return service.allWaterCounter();
+    }
+
+    @Override
+    public WaterMeter getOneWaterMeter(long inputCommand) {
+        return service.getWaterCounter(inputCommand);
+
     }
 
     private boolean validateSerialNumber(String serialNumber) {

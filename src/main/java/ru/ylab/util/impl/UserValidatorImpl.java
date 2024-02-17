@@ -113,9 +113,6 @@ public class UserValidatorImpl implements UserValidator {
     @Override
     public List<User> allUsers() {
         List<User> users = userService.allUsers();
-        if (users.isEmpty()) {
-            return Collections.emptyList();
-        }
         return users;
     }
 
@@ -124,14 +121,19 @@ public class UserValidatorImpl implements UserValidator {
         return user.getRole().equals(Role.ADMIN);
     }
 
-    @Override
-    public boolean addCounter(User user, WaterMeter waterCounter) {
-        return userService.addWaterCounter(user, waterCounter);
-    }
+//    @Override
+//    public boolean addCounter(User user, WaterMeter waterCounter) {
+//        return userService.addWaterCounter(user, waterCounter);
+//    }
 
     @Override
     public List<WaterMeter> getWaterCounters(User owner) {
         return userService.waterCounters(owner);
+    }
+
+    @Override
+    public User getById(int index) {
+        return userService.getUserById(index);
     }
 
 

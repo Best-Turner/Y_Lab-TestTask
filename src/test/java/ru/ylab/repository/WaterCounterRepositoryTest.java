@@ -7,9 +7,8 @@ import ru.ylab.model.Role;
 import ru.ylab.model.User;
 import ru.ylab.model.WaterMeter;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.sql.Connection;
+import java.util.*;
 
 import static org.junit.Assert.*;
 
@@ -19,11 +18,12 @@ public class WaterCounterRepositoryTest {
     private final static String SERIAL_NUMBER = "H-1234";
     private final static Float VALUE = 123f;
     private final static CounterType TYPE = CounterType.HOT;
+    private Connection connection;
     private WaterMeter waterCounter;
     private WaterMeter waterCounter1;
     private User owner;
     private WaterCounterRepository repository;
-    private Map<String, WaterMeter> counterMap;
+    private List<WaterMeter> counterMap;
 
 
     @Before
@@ -31,9 +31,9 @@ public class WaterCounterRepositoryTest {
         owner = new User(1L, "user", "user@mai.ru", "1234", Role.USER);
         waterCounter = new WaterMeter(ID, SERIAL_NUMBER, TYPE, VALUE, owner);
         waterCounter1 = new WaterMeter(ID + 1, SERIAL_NUMBER.concat("123"), TYPE, VALUE, owner);
-        counterMap = new HashMap<>();
-        counterMap.put(SERIAL_NUMBER, waterCounter);
-        repository = new WaterCounterRepository(counterMap);
+        counterMap = new ArrayList<>();
+        counterMap.add(waterCounter);
+        repository = new WaterCounterRepository(connection);
     }
 
 
@@ -82,19 +82,12 @@ public class WaterCounterRepositoryTest {
         assertFalse(repository.isExist(SERIAL_NUMBER + "123"));
     }
 
-    @Test
-    public void whenDeleteExistWaterCounterThenSizeShouldBeDecrease() {
-        int actual = counterMap.size();
-        assertEquals(1, actual);
-        repository.delete(waterCounter);
-        actual = counterMap.size();
-        assertEquals(0, actual);
-    }
+
 
     @Test
     public void whenGetListWaterCounterThenReturnMap() {
-        Map<String, WaterMeter> actual = repository.getAllWaterCounters();
-        assertEquals(HashMap.class, actual.getClass());
+        List<WaterMeter> actual = repository.getAllWaterCounters();
+        assertEquals(List.class, actual.getClass());
         assertEquals(counterMap, actual);
     }
 

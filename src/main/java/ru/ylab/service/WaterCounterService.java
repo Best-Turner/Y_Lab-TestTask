@@ -6,7 +6,6 @@ import ru.ylab.model.MeterData;
 import ru.ylab.model.WaterMeter;
 
 import java.util.List;
-import java.util.Set;
 
 public interface WaterCounterService {
 
@@ -14,16 +13,16 @@ public interface WaterCounterService {
 
     WaterMeter getWaterCounter(String serialNumber) throws WaterCounterNotFoundException;
 
-    Set<WaterMeter> allWaterCounter();
+    List<WaterMeter> allWaterCounter();
 
     void transferData(String serialNumber, Float newValue) throws InvalidDataException, WaterCounterNotFoundException;
-
-    boolean delete(String serialNumber);
 
     Float currentValue(String serialNumber) throws WaterCounterNotFoundException;
 
     Float getValueByDate(String serialNumber, String date) throws WaterCounterNotFoundException;
 
-    List<MeterData> getValues(String serialNumber) throws WaterCounterNotFoundException;
+    List<MeterData> getValues(long id) throws WaterCounterNotFoundException;
+
+    WaterMeter getWaterCounter(long inputCommand);
 }
 

@@ -22,7 +22,10 @@ public interface UserValidator {
 
     boolean isAdmin(User user);
 
-    boolean addCounter(User user, WaterMeter waterCounter);
+//    boolean addCounter(User user, WaterMeter waterCounter);
 
     List<WaterMeter> getWaterCounters(User owner);
+
+    User getById(int index);
+
 }

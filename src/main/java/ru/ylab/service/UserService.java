@@ -52,16 +52,18 @@ public interface UserService {
      */
 
     boolean checkUserCredentials(User userByEmail, String password) throws UserNotFoundException;
+//
+//    /**
+//     * Add new water counter.
+//     *
+//     * @param user         User owner counter.
+//     * @param waterCounter new counter.
+//     * @return true if added.
+//     */
 
-    /**
-     * Add new water counter.
-     *
-     * @param user         User owner counter.
-     * @param waterCounter new counter.
-     * @return true if added.
-     */
-
-    boolean addWaterCounter(User user, WaterMeter waterCounter);
+//    boolean addWaterCounter(User user, WaterMeter waterCounter);
 
     List<WaterMeter> waterCounters(User owner);
+
+    User getUserById(int index);
 }

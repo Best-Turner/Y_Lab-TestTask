@@ -41,12 +41,6 @@ public class CounterDataStorageServiceTest {
 
     }
 
-    @Test
-    public void shouldCallMethodRegistrationWaterCounter() {
-        verify(repository, never()).registrationWaterMeter(ID);
-        service.registrationCounter(waterCounter);
-        verify(repository, times(1)).registrationWaterMeter(ID);
-    }
 
     @Test
     public void whenChangeCurrentValueThenReturnTrue() throws InvalidDataException {
@@ -60,7 +54,7 @@ public class CounterDataStorageServiceTest {
     public void whenGetValuesThenReturnList() {
         List<MeterData> expect = Collections.emptyList();
         when(repository.isExist(ID)).thenReturn(true);
-        when(repository.getValues(ID)).thenReturn(expect);
+        when(repository.getValuesByWaterMeterId(ID)).thenReturn(expect);
         List<MeterData> actual = service.getValues(ID);
         assertEquals(expect, actual);
     }
