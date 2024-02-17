@@ -81,25 +81,28 @@ public class WaterCounterServiceTest {
     }
 
     @Test
-    public void shouldCallMethodSubmitValueWhenValueChanges() throws InvalidDataException {
-        when(storageService.submitValue(SERIAL_NUMBER, VALUE)).thenReturn(true);
+    public void shouldCallMethodSubmitValueWhenValueChanges() throws InvalidDataException, WaterCounterNotFoundException {
+        when(storageService.submitValue(ID, VALUE)).thenReturn(true);
+        when(repository.getWaterCounter(SERIAL_NUMBER)).thenReturn(Optional.of(waterCounter));
         service.transferData(SERIAL_NUMBER, 123f);
-        verify(storageService, times(1)).submitValue(SERIAL_NUMBER, 123f);
+        verify(storageService, times(1)).submitValue(ID, 123f);
     }
 
     @Test
-    public void shouldCallMethodGetCurrentValueAndReturnValue() {
-        when(storageService.getCurrentValue(SERIAL_NUMBER)).thenReturn(VALUE);
+    public void shouldCallMethodGetCurrentValueAndReturnValue() throws WaterCounterNotFoundException {
+        when(storageService.getCurrentValue(ID)).thenReturn(VALUE);
+        when(repository.getWaterCounter(SERIAL_NUMBER)).thenReturn(Optional.of(waterCounter));
         Float actual = service.currentValue(SERIAL_NUMBER);
-        verify(storageService, times(1)).getCurrentValue(SERIAL_NUMBER);
+        verify(storageService, times(1)).getCurrentValue(ID);
         assertEquals(VALUE, actual);
     }
 
     @Test
     public void whenDeleteIsExistWaterCounterReturnTrue() {
         when(repository.isExist(SERIAL_NUMBER)).thenReturn(true);
-        service.delete(SERIAL_NUMBER);
-        verify(storageService, times(1)).delete(SERIAL_NUMBER);
+        when(repository.getWaterCounter(SERIAL_NUMBER)).thenReturn(Optional.of(waterCounter));
+        service.delete(waterCounter);
+        verify(storageService, times(1)).delete(ID);
         verify(repository, times(1)).delete(SERIAL_NUMBER);
         boolean actual = service.delete(SERIAL_NUMBER);
         assertTrue(actual);
@@ -109,17 +112,18 @@ public class WaterCounterServiceTest {
     public void whenDeleteIsNotExistWaterCounterReturnTrue() {
         when(repository.isExist(SERIAL_NUMBER)).thenReturn(false);
         service.delete(SERIAL_NUMBER);
-        verify(storageService, never()).delete(SERIAL_NUMBER);
+        verify(storageService, never()).delete(ID);
         verify(repository, never()).delete(SERIAL_NUMBER);
         boolean actual = service.delete(SERIAL_NUMBER);
         assertFalse(actual);
     }
 
     @Test
-    public void shouldCallMethodGetValuesAndReturnMap() {
-        when(storageService.getValues(SERIAL_NUMBER)).thenReturn(Collections.emptyList());
+    public void shouldCallMethodGetValuesAndReturnMap() throws WaterCounterNotFoundException {
+        when(storageService.getValues(ID)).thenReturn(Collections.emptyList());
+        when(repository.getWaterCounter(SERIAL_NUMBER)).thenReturn(Optional.of(waterCounter));
         List<MeterData> actual = service.getValues(SERIAL_NUMBER);
-        verify(storageService, times(1)).getValues(SERIAL_NUMBER);
+        verify(storageService, times(1)).getValues(ID);
         assertEquals(Collections.emptyList(), actual);
     }
 }

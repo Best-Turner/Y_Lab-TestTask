@@ -10,16 +10,16 @@ public interface MeterDataService {
 
     void registrationCounter(WaterMeter waterCounter);
 
-    boolean submitValue(String serialNumber, Float value) throws InvalidDataException;
+    boolean submitValue(long waterMeterId, Float value) throws InvalidDataException;
 
-    Float getCurrentValue(String serialNumber);
+    Float getCurrentValue(long waterMeterId);
 
-    Float getValueByDate(String serialNumber, String date);
+    Float getValueByDate(long waterMeterId, String date);
 
-    List<MeterData> getValues(String serialNumber);
+    List<MeterData> getValues(long waterMeterId);
 
-    boolean isRegistrInStorage(String serialNumber);
+    boolean isRegistrInStorage(long waterMeterId);
 
-    void delete(String serialNumber);
+    void delete(long waterMeterId);
 
 }

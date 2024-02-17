@@ -43,33 +43,33 @@ public class CounterDataStorageServiceTest {
 
     @Test
     public void shouldCallMethodRegistrationWaterCounter() {
-        verify(repository, never()).registrationWaterMeter(SERIAL_NUMBER);
+        verify(repository, never()).registrationWaterMeter(ID);
         service.registrationCounter(waterCounter);
-        verify(repository, times(1)).registrationWaterMeter(SERIAL_NUMBER);
+        verify(repository, times(1)).registrationWaterMeter(ID);
     }
 
     @Test
     public void whenChangeCurrentValueThenReturnTrue() throws InvalidDataException {
-        when(repository.isExist(SERIAL_NUMBER)).thenReturn(true);
-        when(repository.getValue(SERIAL_NUMBER, DATE)).thenReturn(VALUE);
-        boolean actual = service.submitValue(SERIAL_NUMBER, VALUE);
+        when(repository.isExist(ID)).thenReturn(true);
+        when(repository.getValue(ID, DATE)).thenReturn(VALUE);
+        boolean actual = service.submitValue(ID, VALUE);
         assertTrue(actual);
     }
 
     @Test
     public void whenGetValuesThenReturnList() {
         List<MeterData> expect = Collections.emptyList();
-        when(repository.isExist(SERIAL_NUMBER)).thenReturn(true);
-        when(repository.getValues(SERIAL_NUMBER)).thenReturn(expect);
-        List<MeterData> actual = service.getValues(SERIAL_NUMBER);
+        when(repository.isExist(ID)).thenReturn(true);
+        when(repository.getValues(ID)).thenReturn(expect);
+        List<MeterData> actual = service.getValues(ID);
         assertEquals(expect, actual);
     }
 
     @Test
     public void whenGetValueByDateThenReturnValue() {
-        when(repository.isExist(SERIAL_NUMBER)).thenReturn(true);
-        when(repository.getValue(SERIAL_NUMBER, DATE)).thenReturn(VALUE);
-        Float actual = service.getValueByDate(SERIAL_NUMBER, DATE);
+        when(repository.isExist(ID)).thenReturn(true);
+        when(repository.getValue(ID, DATE)).thenReturn(VALUE);
+        Float actual = service.getValueByDate(ID, DATE);
         assertEquals(VALUE, actual);
     }
 

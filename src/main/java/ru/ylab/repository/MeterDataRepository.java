@@ -14,7 +14,7 @@ import java.util.Map;
  */
 
 public class MeterDataRepository {
-    private final Map<String, Map<String, Float>> storage;
+    private final Map<Long, Map<String, Float>> storage;
     private Map<String, Float> values;
 
     /**
@@ -27,11 +27,11 @@ public class MeterDataRepository {
     /**
      * Registers a water counter with the given serial number.
      *
-     * @param serialNumber The serial number of the water counter to register.
+     * @param waterMeterId The id of the water meter to register.
      */
-    public void registrationWaterMeter(String serialNumber) {
+    public void registrationWaterMeter(long waterMeterId) {
         values = new HashMap<>();
-        storage.put(serialNumber, values);
+        storage.put(waterMeterId, values);
     }
 
     /**
@@ -40,44 +40,44 @@ public class MeterDataRepository {
      * @param meterData The data about water meter.
      */
     public void addValue(MeterData meterData) {
-        String serialNumberMeterWater = meterData.getSerialNumberMeterWater();
+        long waterMeterId = meterData.getWaterMeterId();
         String date = meterData.getDate();
         float value = meterData.getValue();
-        storage.get(serialNumberMeterWater).put(date, value);
+        storage.get(waterMeterId).put(date, value);
     }
 
     /**
      * Checks if a water counter with the specified serial number exists in the data storage.
      *
-     * @param serialNumber The serial number to check for existence.
+     * @param waterMeterId The id to check for existence.
      * @return True if the water counter exists, false otherwise.
      */
-    public boolean isExist(String serialNumber) {
-        return storage.containsKey(serialNumber);
+    public boolean isExist(long waterMeterId) {
+        return storage.containsKey(waterMeterId);
     }
 
     /**
      * Retrieves the value associated with a water counter for a specific date.
      *
-     * @param serialNumber The serial number of the water counter.
+     * @param waterMeterId The id of the water counter.
      * @param dateKey      The date for which the value is requested.
      * @return The value associated with the specified serial number and date.
      */
-    public Float getValue(String serialNumber, String dateKey) {
-        return storage.get(serialNumber).get(dateKey);
+    public Float getValue(long waterMeterId, String dateKey) {
+        return storage.get(waterMeterId).get(dateKey);
     }
 
     /**
      * Retrieves all values associated with a water counter.
      *
-     * @param serialNumber The serial number of the water counter.
+     * @param waterMeterId The id of the water counter.
      * @return A map of all values associated with the specified water counter.
      */
-    public List<MeterData> getValues(String serialNumber) {
+    public List<MeterData> getValues(long waterMeterId) {
         List<MeterData> meterData = new ArrayList<>();
-        ;
-        for (Map.Entry<String, Float> data : storage.get(serialNumber).entrySet()) {
-            meterData.add(new MeterData(serialNumber, data.getKey(), data.getValue()));
+
+        for (Map.Entry<String, Float> data : storage.get(waterMeterId).entrySet()) {
+            meterData.add(new MeterData(waterMeterId, data.getKey(), data.getValue()));
         }
         return meterData;
     }
@@ -85,10 +85,10 @@ public class MeterDataRepository {
     /**
      * Deletes a water counter along with its associated data from the data storage.
      *
-     * @param serialNumber The serial number of the water counter to delete.
+     * @param waterMeterId The water metre id of the water counter to delete.
      * @return True if the deletion was successful, false otherwise.
      */
-    public boolean delete(String serialNumber) {
-        return storage.remove(serialNumber).isEmpty();
+    public boolean delete(long waterMeterId) {
+        return storage.remove(waterMeterId).isEmpty();
     }
 }

@@ -16,14 +16,14 @@ public interface WaterCounterService {
 
     Set<WaterMeter> allWaterCounter();
 
-    void transferData(String serialNumber, Float newValue) throws InvalidDataException;
+    void transferData(String serialNumber, Float newValue) throws InvalidDataException, WaterCounterNotFoundException;
 
     boolean delete(String serialNumber);
 
-    Float currentValue(String serialNumber);
+    Float currentValue(String serialNumber) throws WaterCounterNotFoundException;
 
-    Float getValueByDate(String serialNumber, String date);
+    Float getValueByDate(String serialNumber, String date) throws WaterCounterNotFoundException;
 
-    List<MeterData> getValues(String serialNumber);
+    List<MeterData> getValues(String serialNumber) throws WaterCounterNotFoundException;
 }
 

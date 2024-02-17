@@ -7,9 +7,31 @@
     <changeSet id="1.2.1" author="Aleksandr">
         <preConditions onFail="MARK_RAN">
             <not>
-                <tableExists tableName=""/>
+                <tableExists tableName="water_meters"/>
             </not>
         </preConditions>
+        <sql>CREATE TYPE type as enum('HOT', 'COLD', 'HEATING')</sql>
+
+        <createTable tableName="water_meters" schemaName="model">
+            <column name="id" type="bigint" autoIncrement="true" startWith="1" incrementBy="1">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="serial_number" type="varchar(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="type" type="type">
+                <constraints nullable="false"/>
+            </column>
+            <column name="current_value" type="numeric">
+                <constraints nullable="false"/>
+            </column>
+            <column name="owner" type="bigint">
+                <constraints nullable="false" foreignKeyName="owner_id"
+                             referencedTableSchemaName="model"
+                             referencedTableName="users"
+                             referencedColumnNames="id"/>
+            </column>
+        </createTable>
     </changeSet>
 
 </databaseChangeLog>

@@ -1,5 +1,12 @@
 package ru.ylab;
 
+import liquibase.Liquibase;
+import liquibase.database.Database;
+import liquibase.database.DatabaseFactory;
+import liquibase.database.jvm.JdbcConnection;
+import liquibase.exception.DatabaseException;
+import liquibase.exception.LiquibaseException;
+import liquibase.resource.ClassLoaderResourceAccessor;
 import ru.ylab.app.in.ConsoleServiceMediator;
 import ru.ylab.model.*;
 import ru.ylab.repository.MeterDataRepository;
@@ -11,11 +18,13 @@ import ru.ylab.service.WaterCounterService;
 import ru.ylab.service.impl.MeterDataServiceImpl;
 import ru.ylab.service.impl.UserServiceImpl;
 import ru.ylab.service.impl.WaterCounterServiceImpl;
+import ru.ylab.util.DBConnector;
 import ru.ylab.util.UserValidator;
 import ru.ylab.util.WaterCounterValidator;
 import ru.ylab.util.impl.UserValidatorImpl;
 import ru.ylab.util.impl.WaterCounterValidatorImpl;
 
+import java.sql.Connection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -30,6 +39,24 @@ import java.util.Map;
 public class Main {
 
     public static void main(String[] args) {
+        try {
+            Connection connection = DBConnector.getConnection();
+            Database database =
+                    DatabaseFactory.getInstance()
+                            .findCorrectDatabaseImplementation(new JdbcConnection(connection));
+            Liquibase liquibase =
+                    new Liquibase("db/changelog/changelog-root.xml",
+                            new ClassLoaderResourceAccessor(), database);
+            liquibase.update();
+            System.out.println("Миграции успешно выполнены!");
+
+        } catch (DatabaseException ex) {
+            throw new RuntimeException(ex);
+        } catch (LiquibaseException ex) {
+            throw new RuntimeException(ex);
+        }
+
+
         Map<String, WaterMeter> counterMap = new HashMap<>();
         Map<String, User> userMap = new HashMap<>();
 
@@ -60,11 +87,11 @@ public class Main {
         WaterCounterService counterService = new WaterCounterServiceImpl(counterRepository, dataStorageService);
         WaterCounterValidator counterValidator = new WaterCounterValidatorImpl(counterService);
         ConsoleServiceMediator console = new ConsoleServiceMediator(userValidator, counterValidator);
-        meterDataRepository.registrationWaterMeter("H-1234");
-        meterDataRepository.registrationWaterMeter("C-4321");
+        meterDataRepository.registrationWaterMeter(counter1.getId());
+        meterDataRepository.registrationWaterMeter(counter2.getId());
 
-        meterDataRepository.addValue(new MeterData("H-1234", "2023-12", 123f));
-        meterDataRepository.addValue(new MeterData("C-4321", "2024-1", 321f));
+        meterDataRepository.addValue(new MeterData(counter1.getId(), "2023-12", 123f));
+        meterDataRepository.addValue(new MeterData(counter2.getId(), "2024-1", 321f));
 
 
         while (true) {

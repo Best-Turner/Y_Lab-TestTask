@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="1.3.1" author="Aleksandr">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="meter_data" schemaName="model"/>
+            </not>
+        </preConditions>
+        <createTable tableName="meter_data" schemaName="model">
+            <column name="id" type="serial">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="water_id" type="bigint">
+                <constraints nullable="false"
+                             foreignKeyName="water_meter_id"
+                             referencedTableSchemaName="model"
+                             referencedTableName="water_meters"
+                             referencedColumnNames="id" deleteCascade="true"/>
+            </column>
+            <column name="date" type="varchar(25)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="value" type="numeric">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

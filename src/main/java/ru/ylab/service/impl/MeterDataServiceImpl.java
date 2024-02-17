@@ -46,30 +46,30 @@ public class MeterDataServiceImpl implements MeterDataService {
      */
     @Override
     public void registrationCounter(WaterMeter waterCounter) {
-        String serialNumber = waterCounter.getSerialNumber();
+        Long id = waterCounter.getId();
         Float value = waterCounter.getCurrentValue();
-        repository.registrationWaterMeter(serialNumber);
-        repository.addValue(new MeterData(serialNumber, getKeyFromDate(now()), value));
+        repository.registrationWaterMeter(id);
+        repository.addValue(new MeterData(id, getKeyFromDate(now()), value));
     }
 
     /**
      * Submits a value for the specified water counter, updating the current value.
      *
-     * @param serialNumber The serial number of the water counter.
+     * @param waterMeterId The id of the water counter.
      * @param value        The value to be submitted.
      * @return True if the submission was successful, false otherwise.
      * @throws InvalidDataException If the submitted value is less than the current value.
      */
     @Override
-    public boolean submitValue(String serialNumber, Float value) throws InvalidDataException {
-        if (!isRegistrInStorage(serialNumber)) {
+    public boolean submitValue(long waterMeterId, Float value) throws InvalidDataException {
+        if (!isRegistrInStorage(waterMeterId)) {
             return false;
         }
 
-        if (!canChangeDate(serialNumber)) {
+        if (!canChangeDate(waterMeterId)) {
             return false;
         }
-        Float currentValue = getCurrentValue(serialNumber);
+        Float currentValue = getCurrentValue(waterMeterId);
         if (currentValue == null) {
             currentValue = 0f;
         }
@@ -78,25 +78,25 @@ public class MeterDataServiceImpl implements MeterDataService {
         }
 
         currentValue = value;
-        repository.addValue(new MeterData(serialNumber, getKeyFromDate(now()), currentValue));
+        repository.addValue(new MeterData(waterMeterId, getKeyFromDate(now()), currentValue));
         return true;
     }
 
     /**
      * Retrieves the current value associated with a water counter.
      *
-     * @param serialNumber The serial number of the water counter.
+     * @param waterMeterId The id of the water counter.
      * @return The current value of the water counter.
      */
     @Override
-    public Float getCurrentValue(String serialNumber) {
+    public Float getCurrentValue(long waterMeterId) {
         Float value;
-        if (!isRegistrInStorage(serialNumber)) {
+        if (!isRegistrInStorage(waterMeterId)) {
             return null;
         }
-        value = repository.getValue(serialNumber, getKeyFromDate(now()));
+        value = repository.getValue(waterMeterId, getKeyFromDate(now()));
         if (value == null) {
-            value = findLastValue(serialNumber);
+            value = findLastValue(waterMeterId);
         }
         return value;
     }
@@ -104,51 +104,51 @@ public class MeterDataServiceImpl implements MeterDataService {
     /**
      * Retrieves the value associated with a water counter for a specific date.
      *
-     * @param serialNumber The serial number of the water counter.
+     * @param waterMeterId The id of the water counter.
      * @param date         The date for which the value is requested ("yyyy-M").
      * @return The value associated with the specified serial number and date.
      */
     @Override
-    public Float getValueByDate(String serialNumber, String date) {  // date - "yyyy - M"
-        if (!isRegistrInStorage(serialNumber)) {
+    public Float getValueByDate(long waterMeterId, String date) {  // date - "yyyy - M"
+        if (!isRegistrInStorage(waterMeterId)) {
             return null;
         }
-        return repository.getValue(serialNumber, date);
+        return repository.getValue(waterMeterId, date);
     }
 
     /**
      * Retrieves all values associated with a water counter.
      *
-     * @param serialNumber The serial number of the water counter.
+     * @param waterMeterId The id of the water counter.
      * @return A map of all values associated with the specified water counter.
      */
     @Override
-    public List<MeterData> getValues(String serialNumber) {
-        if (!isRegistrInStorage(serialNumber)) {
+    public List<MeterData> getValues(long waterMeterId) {
+        if (!isRegistrInStorage(waterMeterId)) {
             return Collections.emptyList();
         }
-        return repository.getValues(serialNumber);
+        return repository.getValues(waterMeterId);
     }
 
     /**
      * Checks if a water counter with the specified serial number exists in the data storage.
      *
-     * @param serialNumber The serial number to check for existence.
+     * @param waterMeterId The id to check for existence.
      * @return True if the water counter exists, false otherwise.
      */
     @Override
-    public boolean isRegistrInStorage(String serialNumber) {
-        return repository.isExist(serialNumber);
+    public boolean isRegistrInStorage(long waterMeterId) {
+        return repository.isExist(waterMeterId);
     }
 
     /**
      * Deletes a water counter and its associated data from the data storage.
      *
-     * @param serialNumber The serial number of the water counter to delete.
+     * @param waterMeterId The id of the water counter to delete.
      */
     @Override
-    public void delete(String serialNumber) {
-        repository.delete(serialNumber);
+    public void delete(long waterMeterId) {
+        repository.delete(waterMeterId);
     }
 
     /**
@@ -168,11 +168,11 @@ public class MeterDataServiceImpl implements MeterDataService {
     /**
      * Finds the last recorded value associated with a water counter.
      *
-     * @param serialNumber The serial number of the water counter.
+     * @param waterMeterId The id of the water counter.
      * @return The last recorded value.
      */
-    private Float findLastValue(String serialNumber) {
-        List<MeterData> data = repository.getValues(serialNumber);
+    private Float findLastValue(long waterMeterId) {
+        List<MeterData> data = repository.getValues(waterMeterId);
         LocalDate lastDateDataTransfer = getLastDateTransfer(data);
         String keyFromDate = getKeyFromDate(lastDateDataTransfer);
         if (keyFromDate == null) {
@@ -202,9 +202,9 @@ public class MeterDataServiceImpl implements MeterDataService {
         return lastDate;
     }
 
-    private boolean canChangeDate(String serialNumber) {
+    private boolean canChangeDate(long waterMeterId) {
 
-        List<MeterData> data = repository.getValues(serialNumber);
+        List<MeterData> data = repository.getValues(waterMeterId);
         LocalDate lastDateTransfer = getLastDateTransfer(data);
         if (lastDateTransfer == null) {
             return true;

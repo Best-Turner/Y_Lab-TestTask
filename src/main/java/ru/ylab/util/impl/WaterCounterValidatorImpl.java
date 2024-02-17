@@ -9,6 +9,7 @@ import ru.ylab.model.WaterMeter;
 import ru.ylab.service.WaterCounterService;
 import ru.ylab.util.WaterCounterValidator;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -47,28 +48,43 @@ public class WaterCounterValidatorImpl implements WaterCounterValidator {
 
     @Override
     public Float getCurrentValue(String serialNumber) {
+        float value = 0;
         if (!validateSerialNumber(serialNumber)) {
-            return null;
+            return value;
         }
-        return service.currentValue(serialNumber);
+        try {
+            value = service.currentValue(serialNumber);
+
+        } catch (WaterCounterNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
+        return value;
     }
 
     @Override
     public List<MeterData> getHistoryValues(String serialNumber) {
-        return service.getValues(serialNumber);
+        List<MeterData> meterData = Collections.emptyList();
+        try {
+            meterData = service.getValues(serialNumber);
+        } catch (WaterCounterNotFoundException e) {
+            System.out.println(e.getMessage());
+        }
+        return meterData;
     }
 
     @Override
     public boolean transferData(String serialNumber, Float value) {
+        boolean result = false;
         if (!validateSerialNumber(serialNumber)) {
-            return false;
+            return result;
         }
         try {
             service.transferData(serialNumber, value);
-        } catch (InvalidDataException e) {
+            result = true;
+        } catch (InvalidDataException | WaterCounterNotFoundException e) {
             System.out.println(e.getMessage());
         }
-        return true;
+        return result;
     }
 
     @Override
@@ -113,7 +129,7 @@ public class WaterCounterValidatorImpl implements WaterCounterValidator {
     private CounterType determineCounterType(String serialNumber) {
         String hot = "H";
         String cold = "C";
-        CounterType counterType = null;
+        CounterType counterType;
         if (serialNumber.startsWith(hot)) {
             counterType = CounterType.HOT;
         } else if (serialNumber.startsWith(cold)) {

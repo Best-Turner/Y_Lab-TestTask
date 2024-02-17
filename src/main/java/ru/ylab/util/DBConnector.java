@@ -3,22 +3,21 @@ package ru.ylab.util;
 import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.Properties;
 
 public class DBConnector {
-    private static final DBConnector INSTANCE = new DBConnector();
+
+    private static Connection connection;
 
     private DBConnector() {
     }
 
-    public static DBConnector getInstance() {
-        return INSTANCE;
-    }
 
     private static String[] getProperties(String path) {
         ClassLoader loader = ClassLoader.getSystemClassLoader();
         final String[] connectionData = new String[3];
-        try (InputStream resourceAsStream = loader.getResourceAsStream(path);) {
+        try (InputStream resourceAsStream = loader.getResourceAsStream(path)) {
             Properties properties = new Properties();
             properties.load(resourceAsStream);
             connectionData[0] = properties.get("url").toString();
@@ -30,15 +29,15 @@ public class DBConnector {
         return connectionData;
     }
 
-    public Connection getConnection() {
+    public static Connection getConnection() {
         String[] properties = getProperties("liquibase.properties");
-
-        try (Connection connection = DriverManager.getConnection(properties[0], properties[1], properties[2])) {
-            System.out.println("Соединение установленно");
-
-        } catch (Exception e) {
-            throw new RuntimeException(e);
+        if (connection == null) {
+            try {
+                connection = DriverManager.getConnection(properties[0], properties[1], properties[2]);
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
-        return null;
+        return connection;
     }
 }

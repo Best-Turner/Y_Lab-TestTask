@@ -55,8 +55,8 @@ public class WaterCounterServiceImpl implements WaterCounterService {
     }
 
     @Override
-    public void transferData(String serialNumber, Float newValue) throws InvalidDataException {
-        storageService.submitValue(serialNumber, newValue);
+    public void transferData(String serialNumber, Float newValue) throws InvalidDataException, WaterCounterNotFoundException {
+        storageService.submitValue(getIdBySerialNumber(serialNumber), newValue);
     }
 
     @Override
@@ -64,28 +64,37 @@ public class WaterCounterServiceImpl implements WaterCounterService {
         if (!repository.isExist(serialNumber)) {
             return false;
         }
-        storageService.delete(serialNumber);
+        Long waterMeterId = repository.getWaterCounter(serialNumber).get().getId();
+        storageService.delete(waterMeterId);
         repository.delete(serialNumber);
         return true;
     }
 
     @Override
-    public Float currentValue(String serialNumber) {
-        return storageService.getCurrentValue(serialNumber);
+    public Float currentValue(String serialNumber) throws WaterCounterNotFoundException {
+        WaterMeter waterCounter = getWaterCounter(serialNumber);
+        return storageService.getCurrentValue(waterCounter.getId());
     }
 
 
     @Override
-    public Float getValueByDate(String serialNumber, String date) {
-        return storageService.getValueByDate(serialNumber, date);
+    public Float getValueByDate(String serialNumber, String date) throws WaterCounterNotFoundException {
+        return storageService.getValueByDate(getIdBySerialNumber(serialNumber), date);
     }
 
     @Override
-    public List<MeterData> getValues(String serialNumber) {
-        return storageService.getValues(serialNumber);
+    public List<MeterData> getValues(String serialNumber) throws WaterCounterNotFoundException {
+        return storageService.getValues(getIdBySerialNumber(serialNumber));
     }
 
     public boolean delete(WaterMeter waterCounter) {
         return delete(waterCounter.getSerialNumber());
+    }
+
+
+    private long getIdBySerialNumber(String serialNumber) throws WaterCounterNotFoundException {
+        WaterMeter waterMeterNotFound = repository.getWaterCounter(serialNumber)
+                .orElseThrow(() -> new WaterCounterNotFoundException("Water meter not found"));
+        return waterMeterNotFound.getId();
     }
 }

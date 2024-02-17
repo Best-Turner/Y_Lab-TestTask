@@ -10,23 +10,22 @@ import java.util.Objects;
 
 public class MeterData {
 
-    private String serialNumberMeterWater;
+    private Long id;
+
+    private long waterMeterId;
+
     private String date;
     private float value;
 
     /**
-     * @param serialNumberMeterWater
+     * @param waterMeterId
      * @param date
      * @param value
      */
-    public MeterData(String serialNumberMeterWater, String date, float value) {
-        this.serialNumberMeterWater = serialNumberMeterWater;
+    public MeterData(long waterMeterId, String date, float value) {
+        this.waterMeterId = waterMeterId;
         this.date = date;
         this.value = value;
-    }
-
-    public void setWaterMeter(String serialNumberMeterWater) {
-        this.serialNumberMeterWater = serialNumberMeterWater;
     }
 
     public String getDate() {
@@ -45,34 +44,33 @@ public class MeterData {
         this.value = value;
     }
 
-    public String getSerialNumberMeterWater() {
-        return serialNumberMeterWater;
+
+    public long getWaterMeterId() {
+        return waterMeterId;
     }
 
-    public void setSerialNumberMeterWater(String serialNumberMeterWater) {
-        this.serialNumberMeterWater = serialNumberMeterWater;
+    public void setWaterMeterId(long waterMeterId) {
+        this.waterMeterId = waterMeterId;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         MeterData data = (MeterData) o;
-        return Float.compare(value, data.value) == 0 && Objects.equals(serialNumberMeterWater, data.serialNumberMeterWater) && Objects.equals(date, data.date);
+        return waterMeterId == data.waterMeterId && Float.compare(value, data.value) == 0 && Objects.equals(id, data.id) && Objects.equals(date, data.date);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(serialNumberMeterWater, date, value);
-    }
-
-    @Override
-    public String toString() {
-        return "MeterData{" +
-                "serialNumberMeterWater='" + serialNumberMeterWater + '\'' +
-                ", date='" + date + '\'' +
-                ", value=" + value +
-                '}';
+        return Objects.hash(id, waterMeterId, date, value);
     }
 }
