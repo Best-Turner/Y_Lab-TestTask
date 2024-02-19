@@ -3,10 +3,7 @@ package ru.ylab.repository;
 import ru.ylab.model.CounterType;
 import ru.ylab.model.WaterMeter;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -60,14 +57,15 @@ public class WaterCounterRepository {
      * @param waterCounter The water counter to be added.
      */
     public void addWaterCounter(WaterMeter waterCounter) {
-        sql = "INSERT INTO model_meters(serial_number, type, current_value, owner) VALUES(?,?,?,?)";
+        sql = "INSERT INTO model.water_meters(serial_number, type, current_value, owner) VALUES(?,?,?,?)";
         try {
+            connection.setAutoCommit(true);
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, waterCounter.getSerialNumber());
-            preparedStatement.setString(2, waterCounter.getType().toString());
+            preparedStatement.setObject(2, waterCounter.getType(), Types.OTHER);
             preparedStatement.setFloat(3, waterCounter.getCurrentValue());
             preparedStatement.setLong(4, waterCounter.getOwner().getId());
-            preparedStatement.execute();
+            int i = preparedStatement.executeUpdate();
             preparedStatement.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -120,13 +118,13 @@ public class WaterCounterRepository {
         return waterMeters;
     }
 
-    public WaterMeter getWaterCounter(long inputCommand) {
+    public WaterMeter getWaterCounter(long waterCounterId) {
         sql = "SELECT * FROM model.water_meters wm WHERE wm.id = ?";
         WaterMeter waterMeterFromDb = null;
 
         try {
             preparedStatement = connection.prepareStatement(sql);
-            preparedStatement.setLong(1, inputCommand);
+            preparedStatement.setLong(1, waterCounterId);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 waterMeterFromDb = waterMeterFromIncomingDatabaseData(resultSet);
@@ -144,11 +142,12 @@ public class WaterCounterRepository {
             String serialNumber = resultSet.getString("serial_number");
             CounterType type = CounterType.valueOf(resultSet.getString("type"));
             float value = resultSet.getFloat("current_value");
-            return new WaterMeter(id, serialNumber, type, value, null);
+
+            WaterMeter waterMeter = new WaterMeter(serialNumber, type, value, null);
+            waterMeter.setId(id);
+            return waterMeter;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
     }
-
-
 }

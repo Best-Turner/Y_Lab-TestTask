@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface MeterDataService {
 
-    void registrationCounter(WaterMeter waterCounter);
+    void registrationCounter(String serialNumber);
 
     boolean submitValue(long waterMeterId, Float value) throws InvalidDataException;
 

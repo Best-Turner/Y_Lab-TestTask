@@ -7,6 +7,7 @@ import ru.ylab.model.WaterMeter;
 import ru.ylab.repository.WaterCounterRepository;
 import ru.ylab.service.MeterDataService;
 import ru.ylab.service.WaterCounterService;
+import ru.ylab.util.impl.WaterCounterValidatorImpl;
 
 import java.util.*;
 
@@ -26,18 +27,15 @@ public class WaterCounterServiceImpl implements WaterCounterService {
     public void save(WaterMeter waterCounter) {
         if (!repository.isExist(waterCounter.getSerialNumber())) {
             repository.addWaterCounter(waterCounter);
-            meterDataService.registrationCounter(waterCounter);
+            meterDataService.registrationCounter(waterCounter.getSerialNumber());
         }
     }
 
     @Override
     public WaterMeter getWaterCounter(String serialNumber) throws WaterCounterNotFoundException {
-
         Optional<WaterMeter> waterCounter = repository.getWaterCounter(serialNumber);
-        if (waterCounter.isEmpty()) {
-            throw new WaterCounterNotFoundException("WaterCounter with this serial number = " + serialNumber + " not found");
-        }
-        return waterCounter.get();
+        return waterCounter.orElseThrow(() ->
+                new WaterCounterNotFoundException("WaterCounter with this serial number = " + serialNumber + " not found"));
 
     }
 
@@ -59,6 +57,7 @@ public class WaterCounterServiceImpl implements WaterCounterService {
     @Override
     public Float currentValue(String serialNumber) throws WaterCounterNotFoundException {
         WaterMeter waterCounter = getWaterCounter(serialNumber);
+        //return waterCounter.getCurrentValue();
         return meterDataService.getCurrentValue(waterCounter.getId());
     }
 
@@ -69,7 +68,7 @@ public class WaterCounterServiceImpl implements WaterCounterService {
     }
 
     @Override
-    public List<MeterData> getValues(long waterMeterId) throws WaterCounterNotFoundException {
+    public List<MeterData> getValues(long waterMeterId) {
         return meterDataService.getValues(waterMeterId);
     }
 

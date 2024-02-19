@@ -63,7 +63,7 @@ public class Main {
         WaterCounterRepository counterRepository = new WaterCounterRepository(connection);
 
         MeterDataRepository meterDataRepository = new MeterDataRepository(connection);
-        MeterDataService dataStorageService = new MeterDataServiceImpl(meterDataRepository);
+        MeterDataService dataStorageService = new MeterDataServiceImpl(meterDataRepository, counterRepository);
         WaterCounterService counterService = new WaterCounterServiceImpl(counterRepository, dataStorageService);
         WaterCounterValidator counterValidator = new WaterCounterValidatorImpl(counterService);
         ConsoleServiceMediator console = new ConsoleServiceMediator(userValidator, counterValidator);

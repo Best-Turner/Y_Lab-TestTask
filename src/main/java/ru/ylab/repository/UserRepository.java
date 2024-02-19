@@ -8,7 +8,6 @@ import ru.ylab.model.WaterMeter;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 /**
@@ -84,14 +83,13 @@ public class UserRepository {
             preparedStatement.setString(1, user.getName());
             preparedStatement.setString(2, user.getEmail());
             preparedStatement.setString(3, user.getPassword());
-            preparedStatement.setObject(4, user.getRole(),Types.OTHER);
+            preparedStatement.setObject(4, user.getRole(), Types.OTHER);
             preparedStatement.executeUpdate();
             preparedStatement.close();
         } catch (SQLException e) {
             throw new RuntimeException(e); //test@mail.ru
         }
     }
-
 
 
     /**
@@ -179,13 +177,14 @@ public class UserRepository {
                 String typeFromDb = resultSet.getString("type");
                 CounterType type = CounterType.valueOf(typeFromDb);
                 float value = resultSet.getFloat("current_value");
-                meters.add(new WaterMeter(id, serialNumber, type, value, null));
+                WaterMeter buildNewWaterMeter = new WaterMeter(serialNumber, type, value, null);
+                buildNewWaterMeter.setId(id);
+                meters.add(buildNewWaterMeter);
             }
             preparedStatement.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        //Set<WaterMeter> waterCounterList = users.get(email).getWaterCounterList();
         return meters;
     }
 
@@ -202,13 +201,13 @@ public class UserRepository {
     private User userFromIncomingDatabaseData(ResultSet resultSet) {
         User userFromDb = null;
         try {
-                long id = resultSet.getLong("id");
-                String name = resultSet.getString("name");
-                String emailFromDb = resultSet.getString("email");
-                String password = resultSet.getString("password");
-                String roleFromDb = resultSet.getString("role");
-                Role role = Role.valueOf(roleFromDb);
-                userFromDb = new User(id, name, emailFromDb, password, role);
+            long id = resultSet.getLong("id");
+            String name = resultSet.getString("name");
+            String emailFromDb = resultSet.getString("email");
+            String password = resultSet.getString("password");
+            String roleFromDb = resultSet.getString("role");
+            Role role = Role.valueOf(roleFromDb);
+            userFromDb = new User(id, name, emailFromDb, password, role);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

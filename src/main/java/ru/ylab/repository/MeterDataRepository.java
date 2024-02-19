@@ -82,7 +82,7 @@ public class MeterDataRepository {
      * @return The value associated with the specified serial number and date.
      */
     public Float getValue(long waterMeterId, String dateKey) {
-        float valueFromDb = 0;
+        float valueFromDb = -1;
         sql = "SELECT * FROM model.meter_data md WHERE md.water_id = ? and md.date = ?";
         try {
             preparedStatement = connection.prepareStatement(sql);

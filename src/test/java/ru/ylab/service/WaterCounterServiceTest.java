@@ -33,7 +33,7 @@ public class WaterCounterServiceTest {
     @Before
     public void setUp() throws Exception {
         owner = new User(1L, "user", "user@mai.ru", "1234", Role.USER);
-        waterCounter = new WaterMeter(ID, SERIAL_NUMBER, TYPE, VALUE, owner);
+        waterCounter = new WaterMeter(SERIAL_NUMBER, TYPE, VALUE, owner);
         MockitoAnnotations.openMocks(this);
     }
 
@@ -42,7 +42,7 @@ public class WaterCounterServiceTest {
         when(repository.isExist(SERIAL_NUMBER)).thenReturn(false);
         service.save(waterCounter);
         verify(repository, times(1)).addWaterCounter(waterCounter);
-        verify(storageService, times(1)).registrationCounter(waterCounter);
+        verify(storageService, times(1)).registrationCounter(SERIAL_NUMBER);
     }
 
     @Test
@@ -50,7 +50,7 @@ public class WaterCounterServiceTest {
         when(repository.isExist(SERIAL_NUMBER)).thenReturn(true);
         service.save(waterCounter);
         verify(repository, never()).addWaterCounter(waterCounter);
-        verify(storageService, never()).registrationCounter(waterCounter);
+        verify(storageService, never()).registrationCounter(SERIAL_NUMBER);
     }
 
     @Test

@@ -4,6 +4,7 @@ import ru.ylab.exception.InvalidDataException;
 import ru.ylab.model.MeterData;
 import ru.ylab.model.WaterMeter;
 import ru.ylab.repository.MeterDataRepository;
+import ru.ylab.repository.WaterCounterRepository;
 import ru.ylab.service.MeterDataService;
 
 import java.time.LocalDate;
@@ -11,6 +12,7 @@ import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * The `MeterDataServiceImpl` class implements the `MeterDataService` interface
@@ -20,14 +22,17 @@ import java.util.List;
  */
 public class MeterDataServiceImpl implements MeterDataService {
     private final MeterDataRepository repository;
+    private final WaterCounterRepository waterCounterRepository;
 
     /**
      * Constructs a new `MeterDataServiceImpl` with the specified `WaterMeterRepository`.
      *
-     * @param repository The repository to be used by the service implementation.
+     * @param repository             The repository to be used by the service implementation.
+     * @param waterCounterRepository
      */
-    public MeterDataServiceImpl(MeterDataRepository repository) {
+    public MeterDataServiceImpl(MeterDataRepository repository, WaterCounterRepository waterCounterRepository) {
         this.repository = repository;
+        this.waterCounterRepository = waterCounterRepository;
     }
 
     /**
@@ -42,14 +47,13 @@ public class MeterDataServiceImpl implements MeterDataService {
     /**
      * Registers a water counter with the given serial number.
      *
-     * @param waterCounter The serial number of the water counter to register.
+     * @param serialNumber The serial number of the water counter to register.
      */
     @Override
-    public void registrationCounter(WaterMeter waterCounter) {
-        Long id = waterCounter.getId();
-        Float value = waterCounter.getCurrentValue();
-        //repository.registrationWaterMeter(id);
-        repository.addValue(new MeterData(id, getKeyFromDate(now()), value));
+    public void registrationCounter(String serialNumber) {
+        Optional<WaterMeter> waterCounter = waterCounterRepository.getWaterCounter(serialNumber);
+        WaterMeter waterMeter = waterCounter.get();
+        repository.addValue(new MeterData(waterMeter.getId(), getKeyFromDate(now()), waterMeter.getCurrentValue()));
     }
 
     /**
@@ -62,10 +66,6 @@ public class MeterDataServiceImpl implements MeterDataService {
      */
     @Override
     public boolean submitValue(long waterMeterId, Float value) throws InvalidDataException {
-        if (!isRegistrInStorage(waterMeterId)) {
-            return false;
-        }
-
         if (!canChangeDate(waterMeterId)) {
             return false;
         }
@@ -95,7 +95,7 @@ public class MeterDataServiceImpl implements MeterDataService {
             return null;
         }
         value = repository.getValue(waterMeterId, getKeyFromDate(now()));
-        if (value == null) {
+        if (value == -1) {
             value = findLastValue(waterMeterId);
         }
         return value;

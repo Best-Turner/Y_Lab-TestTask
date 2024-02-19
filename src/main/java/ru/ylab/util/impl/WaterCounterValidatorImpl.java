@@ -24,7 +24,6 @@ public class WaterCounterValidatorImpl implements WaterCounterValidator {
             "O - heating;\n" +
             "XXXX - serial number";
     private final static String MESSAGE_WRONG_SERIAL_NUMBER = "Invalid serial number format.\n" + PATTERN_SERIAL_NUMBER;
-    private static Long count = 1L;
     private final WaterCounterService service;
 
     public WaterCounterValidatorImpl(WaterCounterService service) {
@@ -32,33 +31,33 @@ public class WaterCounterValidatorImpl implements WaterCounterValidator {
     }
 
     @Override
-    public boolean createCounter(String serialNumber, Float value, User owner) {
+    public boolean createCounter(String serialNumber, Float currentValue, User owner) {
         if (!validateSerialNumber(serialNumber)) {
             return false;
         }
         CounterType counterType = determineCounterType(serialNumber);
-        if (value == null) {
-            value = 0f;
+        if (currentValue == null) {
+            currentValue = 0f;
         }
-        WaterMeter newWaterCounter = new WaterMeter(++count, serialNumber, counterType, value, owner);
+        WaterMeter newWaterCounter = new WaterMeter(serialNumber, counterType, currentValue, owner);
         service.save(newWaterCounter);
-        owner.getWaterCounterList().add(newWaterCounter);
+        //owner.getWaterCounterList().add(newWaterCounter);
         return true;
     }
 
     @Override
     public Float getCurrentValue(String serialNumber) {
-        float value = 0;
+        float currentValue = 0;
         if (!validateSerialNumber(serialNumber)) {
-            return value;
+            return currentValue;
         }
         try {
-            value = service.currentValue(serialNumber);
+            currentValue = service.currentValue(serialNumber);
 
         } catch (WaterCounterNotFoundException e) {
             System.out.println(e.getMessage());
         }
-        return value;
+        return currentValue;
     }
 
     @Override

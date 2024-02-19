@@ -24,14 +24,12 @@ public class WaterMeter {
     /**
      * Parameterized constructor for the `WaterCounter` class.
      *
-     * @param id           The unique identifier for the water counter.
      * @param serialNumber The serial number associated with the water counter.
      * @param type         The type of counter (e.g., residential, commercial).
      * @param currentValue The current measured value of the water consumption.
      * @param owner        The user who owns or is assigned the water counter.
      */
-    public WaterMeter(Long id, String serialNumber, CounterType type, Float currentValue, User owner) {
-        this.id = id;
+    public WaterMeter(String serialNumber, CounterType type, Float currentValue, User owner) {
         this.serialNumber = serialNumber;
         this.type = type;
         this.currentValue = currentValue;
