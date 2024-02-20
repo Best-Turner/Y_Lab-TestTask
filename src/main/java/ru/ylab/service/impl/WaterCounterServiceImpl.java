@@ -7,9 +7,10 @@ import ru.ylab.model.WaterMeter;
 import ru.ylab.repository.WaterCounterRepository;
 import ru.ylab.service.MeterDataService;
 import ru.ylab.service.WaterCounterService;
-import ru.ylab.util.impl.WaterCounterValidatorImpl;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
 public class WaterCounterServiceImpl implements WaterCounterService {
 
@@ -27,8 +28,8 @@ public class WaterCounterServiceImpl implements WaterCounterService {
     public void save(WaterMeter waterCounter) {
         if (!repository.isExist(waterCounter.getSerialNumber())) {
             repository.addWaterCounter(waterCounter);
-            meterDataService.registrationCounter(waterCounter.getSerialNumber());
         }
+        meterDataService.registrationCounter(waterCounter.getId(), waterCounter.getCurrentValue());
     }
 
     @Override
@@ -43,22 +44,22 @@ public class WaterCounterServiceImpl implements WaterCounterService {
     public List<WaterMeter> allWaterCounter() {
         List<WaterMeter> allWaterCounters = repository.getAllWaterCounters();
         if (allWaterCounters.isEmpty()) {
-           return Collections.emptyList();
+            return Collections.emptyList();
         }
         return allWaterCounters;
     }
 
     @Override
-    public void transferData(String serialNumber, Float newValue) throws InvalidDataException, WaterCounterNotFoundException {
-        meterDataService.submitValue(getIdBySerialNumber(serialNumber), newValue);
+    public void updateCurrentValue(String serialNumber, Float newValue) throws InvalidDataException, WaterCounterNotFoundException {
+        long idBySerialNumber = getIdBySerialNumber(serialNumber);
+        repository.updateCurrentValue(idBySerialNumber, newValue);
+        meterDataService.submitValue(idBySerialNumber, newValue);
     }
 
 
     @Override
     public Float currentValue(String serialNumber) throws WaterCounterNotFoundException {
-        WaterMeter waterCounter = getWaterCounter(serialNumber);
-        //return waterCounter.getCurrentValue();
-        return meterDataService.getCurrentValue(waterCounter.getId());
+        return getWaterCounter(serialNumber).getCurrentValue();
     }
 
 

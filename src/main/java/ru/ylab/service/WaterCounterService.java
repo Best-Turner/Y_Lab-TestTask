@@ -9,13 +9,13 @@ import java.util.List;
 
 public interface WaterCounterService {
 
-    void save(WaterMeter waterCounter);
+    void save(WaterMeter waterCounter) throws WaterCounterNotFoundException;
 
     WaterMeter getWaterCounter(String serialNumber) throws WaterCounterNotFoundException;
 
     List<WaterMeter> allWaterCounter();
 
-    void transferData(String serialNumber, Float newValue) throws InvalidDataException, WaterCounterNotFoundException;
+    void updateCurrentValue(String serialNumber, Float newValue) throws InvalidDataException, WaterCounterNotFoundException;
 
     Float currentValue(String serialNumber) throws WaterCounterNotFoundException;
 

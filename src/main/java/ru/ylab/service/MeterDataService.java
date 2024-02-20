@@ -1,6 +1,7 @@
 package ru.ylab.service;
 
 import ru.ylab.exception.InvalidDataException;
+import ru.ylab.exception.WaterCounterNotFoundException;
 import ru.ylab.model.MeterData;
 import ru.ylab.model.WaterMeter;
 
@@ -8,9 +9,9 @@ import java.util.List;
 
 public interface MeterDataService {
 
-    void registrationCounter(String serialNumber);
+    void registrationCounter(long waterMeterId, float value);
 
-    boolean submitValue(long waterMeterId, Float value) throws InvalidDataException;
+    boolean submitValue(long waterMeterId, Float value) throws InvalidDataException, WaterCounterNotFoundException;
 
     Float getCurrentValue(long waterMeterId);
 

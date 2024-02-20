@@ -6,6 +6,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import ru.ylab.exception.InvalidDataException;
+import ru.ylab.exception.WaterCounterNotFoundException;
 import ru.ylab.model.CounterType;
 import ru.ylab.model.MeterData;
 import ru.ylab.model.User;
@@ -36,14 +37,15 @@ public class CounterDataStorageServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        waterCounter = new WaterMeter(ID, SERIAL_NUMBER, TYPE, VALUE, owner);
+        waterCounter = new WaterMeter(SERIAL_NUMBER, TYPE, VALUE, owner);
+        waterCounter.setId(ID);
         MockitoAnnotations.openMocks(this);
 
     }
 
 
     @Test
-    public void whenChangeCurrentValueThenReturnTrue() throws InvalidDataException {
+    public void whenChangeCurrentValueThenReturnTrue() throws InvalidDataException, WaterCounterNotFoundException {
         when(repository.isExist(ID)).thenReturn(true);
         when(repository.getValue(ID, DATE)).thenReturn(VALUE);
         boolean actual = service.submitValue(ID, VALUE);

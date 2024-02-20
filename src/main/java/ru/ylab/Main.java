@@ -36,6 +36,7 @@ import java.sql.Connection;
 public class Main {
     //       admin@mail.ru
     //       user@mail.ru
+    //       test@mail.ru
     private static Connection connection;
 
     public static void main(String[] args) {
@@ -63,7 +64,7 @@ public class Main {
         WaterCounterRepository counterRepository = new WaterCounterRepository(connection);
 
         MeterDataRepository meterDataRepository = new MeterDataRepository(connection);
-        MeterDataService dataStorageService = new MeterDataServiceImpl(meterDataRepository, counterRepository);
+        MeterDataService dataStorageService = new MeterDataServiceImpl(meterDataRepository);
         WaterCounterService counterService = new WaterCounterServiceImpl(counterRepository, dataStorageService);
         WaterCounterValidator counterValidator = new WaterCounterValidatorImpl(counterService);
         ConsoleServiceMediator console = new ConsoleServiceMediator(userValidator, counterValidator);

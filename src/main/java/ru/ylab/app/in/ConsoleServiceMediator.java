@@ -253,9 +253,8 @@ public class ConsoleServiceMediator {
     }
 
     private void getCounterById(List<WaterMeter> waterCounters) {
-        System.out.println("Enter ID water counter");
         System.out.println(COMMAND_BACK);
-        String command = readUserCommand();
+        String command = readUserCommand("Enter ID water counter");
         AuditLogger.log("Get info about water counter with id = " + command);
         int inputCommand;
         try {
@@ -265,19 +264,11 @@ public class ConsoleServiceMediator {
             System.out.println(WRONG_COMMAND);
             return;
         }
-//        if (index == 0 || index > waterCounters.size()) {
-//            AuditLogger.log("Exit");
-//            return;
-//        }
         WaterMeter counterById = counterValidator.getOneWaterMeter(inputCommand);
-        //List<MeterData> historyValues = counterValidator.getHistoryValues(inputCommand);
-        //WaterMeter counterById = waterCounters.get(inputCommand - 1);
-
         getInfoAboutCounter(counterById);
-
     }
 
-    private void getInfoAboutCounter(WaterMeter counter) {
+    private void getInfoAboutCounter(WaterMeter waterMeter) {
         System.out.println(COMMAND_ONE + CURRENT_VALUE);
         System.out.println(COMMAND_TWO + TRANSFER_DATA);
         System.out.println(COMMAND_THREE + HISTORY_VALUES);
@@ -286,16 +277,16 @@ public class ConsoleServiceMediator {
         switch (command) {
             case COMMAND_ONE -> {
                 AuditLogger.log("Get info about current value");
-                Float currentValue = counterValidator.getCurrentValue(counter.getSerialNumber());
-                System.out.printf("\nSerial number counter - %s\n\tCurrent value = %.2f\n\n", counter.getSerialNumber(), currentValue);
+                Float currentValue = counterValidator.getCurrentValue(waterMeter.getSerialNumber());
+                System.out.printf("\nSerial number counter - %s\n\tCurrent value = %.2f\n\n", waterMeter.getSerialNumber(), currentValue);
             }
             case COMMAND_TWO -> {
                 AuditLogger.log("Pass value");
-                passValue(counter);
+                passValue(waterMeter);
             }
             case COMMAND_THREE -> {
                 AuditLogger.log("Show values");
-                printValues(counter.getId());
+                printValues(waterMeter.getId());
             }
             case COMMAND_BACK -> {
                 AuditLogger.log("Exit");
@@ -322,7 +313,7 @@ public class ConsoleServiceMediator {
             System.out.println(WRONG_COMMAND);
             return;
         }
-        counterValidator.transferData(counter.getSerialNumber(), newValue);
+        counterValidator.changeCurrentValue(counter.getSerialNumber(), newValue);
     }
 
     private void printValues(long waterMeterId) {

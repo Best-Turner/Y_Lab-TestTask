@@ -45,6 +45,7 @@ public class MeterDataRepository {
             preparedStatement.setString(2, date);
             preparedStatement.setFloat(3, value);
             preparedStatement.executeUpdate();
+            connection.commit();
             preparedStatement.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -90,7 +91,7 @@ public class MeterDataRepository {
             preparedStatement.setString(2, dateKey);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
-                valueFromDb = resultSet.getFloat(1);
+                valueFromDb = resultSet.getFloat("value");
             }
             preparedStatement.close();
         } catch (SQLException e) {

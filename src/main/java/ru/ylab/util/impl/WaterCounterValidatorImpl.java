@@ -11,7 +11,6 @@ import ru.ylab.util.WaterCounterValidator;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -40,7 +39,12 @@ public class WaterCounterValidatorImpl implements WaterCounterValidator {
             currentValue = 0f;
         }
         WaterMeter newWaterCounter = new WaterMeter(serialNumber, counterType, currentValue, owner);
-        service.save(newWaterCounter);
+        try {
+            service.save(newWaterCounter);
+        } catch (WaterCounterNotFoundException e) {
+            System.out.println(e.getMessage());
+            return false;
+        }
         //owner.getWaterCounterList().add(newWaterCounter);
         return true;
     }
@@ -72,19 +76,20 @@ public class WaterCounterValidatorImpl implements WaterCounterValidator {
     }
 
     @Override
-    public boolean transferData(String serialNumber, Float value) {
+    public boolean changeCurrentValue(String serialNumber, Float value) {
         boolean result = false;
         if (!validateSerialNumber(serialNumber)) {
             return result;
         }
         try {
-            service.transferData(serialNumber, value);
+            service.updateCurrentValue(serialNumber, value);
             result = true;
         } catch (InvalidDataException | WaterCounterNotFoundException e) {
             System.out.println(e.getMessage());
         }
         return result;
     }
+
 
     @Override
     public List<WaterMeter> getWaterCounters() {

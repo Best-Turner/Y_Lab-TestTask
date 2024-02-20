@@ -11,9 +11,12 @@ import ru.ylab.model.*;
 import ru.ylab.repository.WaterCounterRepository;
 import ru.ylab.service.impl.WaterCounterServiceImpl;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
 
 public class WaterCounterServiceTest {
@@ -38,19 +41,19 @@ public class WaterCounterServiceTest {
     }
 
     @Test
-    public void shouldCallMethodAddWaterCounterAndRegistrationCounterWhenSaveCounter() {
+    public void shouldCallMethodAddWaterCounterAndRegistrationCounterWhenSaveCounter() throws WaterCounterNotFoundException {
         when(repository.isExist(SERIAL_NUMBER)).thenReturn(false);
         service.save(waterCounter);
         verify(repository, times(1)).addWaterCounter(waterCounter);
-        verify(storageService, times(1)).registrationCounter(SERIAL_NUMBER);
+        verify(storageService, times(1)).registrationCounter(ID, VALUE);
     }
 
     @Test
-    public void NotShouldCallMethodAddWaterCounterAndRegistrationCounterWhenSaveCounter() {
+    public void NotShouldCallMethodAddWaterCounterAndRegistrationCounterWhenSaveCounter() throws WaterCounterNotFoundException {
         when(repository.isExist(SERIAL_NUMBER)).thenReturn(true);
         service.save(waterCounter);
         verify(repository, never()).addWaterCounter(waterCounter);
-        verify(storageService, never()).registrationCounter(SERIAL_NUMBER);
+        verify(storageService, never()).registrationCounter(ID, VALUE);
     }
 
     @Test
@@ -84,7 +87,7 @@ public class WaterCounterServiceTest {
     public void shouldCallMethodSubmitValueWhenValueChanges() throws InvalidDataException, WaterCounterNotFoundException {
         when(storageService.submitValue(ID, VALUE)).thenReturn(true);
         when(repository.getWaterCounter(SERIAL_NUMBER)).thenReturn(Optional.of(waterCounter));
-        service.transferData(SERIAL_NUMBER, 123f);
+        service.updateCurrentValue(SERIAL_NUMBER, 123f);
         verify(storageService, times(1)).submitValue(ID, 123f);
     }
 
@@ -96,7 +99,6 @@ public class WaterCounterServiceTest {
         verify(storageService, times(1)).getCurrentValue(ID);
         assertEquals(VALUE, actual);
     }
-
 
 
     @Test

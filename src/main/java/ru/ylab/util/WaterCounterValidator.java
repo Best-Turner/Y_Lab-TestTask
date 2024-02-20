@@ -5,7 +5,6 @@ import ru.ylab.model.User;
 import ru.ylab.model.WaterMeter;
 
 import java.util.List;
-import java.util.Set;
 
 public interface WaterCounterValidator {
     boolean createCounter(String serialNumber, Float value, User owner);
@@ -14,8 +13,7 @@ public interface WaterCounterValidator {
 
     List<MeterData> getHistoryValues(long waterMeterId);
 
-    boolean transferData(String serialNumber, Float value);
-
+    boolean changeCurrentValue(String serialNumber, Float value);
 
     List<WaterMeter> getWaterCounters();
 

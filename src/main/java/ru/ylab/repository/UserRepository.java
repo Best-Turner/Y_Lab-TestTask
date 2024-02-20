@@ -78,13 +78,14 @@ public class UserRepository {
     public void save(User user) {
         sql = "INSERT INTO model.users (name, email, password, role) VALUES(?,?,?,?)";
         try {
-            connection.setAutoCommit(true);
+
             preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, user.getName());
             preparedStatement.setString(2, user.getEmail());
             preparedStatement.setString(3, user.getPassword());
             preparedStatement.setObject(4, user.getRole(), Types.OTHER);
             preparedStatement.executeUpdate();
+            connection.commit();
             preparedStatement.close();
         } catch (SQLException e) {
             throw new RuntimeException(e); //test@mail.ru
