@@ -7,8 +7,8 @@ import liquibase.database.jvm.JdbcConnection;
 import liquibase.exception.DatabaseException;
 import liquibase.exception.LiquibaseException;
 import liquibase.resource.ClassLoaderResourceAccessor;
-import ru.ylab.app.in.ConsoleServiceMediator;
-import ru.ylab.model.User;
+import ru.ylab.app.in.menu.EntryMenu;
+import ru.ylab.app.in.menu.Menu;
 import ru.ylab.repository.MeterDataRepository;
 import ru.ylab.repository.UserRepository;
 import ru.ylab.repository.WaterCounterRepository;
@@ -67,14 +67,17 @@ public class Main {
         MeterDataService dataStorageService = new MeterDataServiceImpl(meterDataRepository);
         WaterCounterService counterService = new WaterCounterServiceImpl(counterRepository, dataStorageService);
         WaterCounterValidator counterValidator = new WaterCounterValidatorImpl(counterService);
-        ConsoleServiceMediator console = new ConsoleServiceMediator(userValidator, counterValidator);
+       // ConsoleServiceMediator console = new ConsoleServiceMediator(userValidator, counterValidator);
 
+        Menu menu = new EntryMenu(userValidator, counterValidator);
+        menu.start();
 
-        while (true) {
-            User user1 = console.processStartPageCommand();
-            if (user1 != null) {
-                console.pageForRegisteredUser(user1);
-            }
-        }
+//
+//        while (true) {
+//            User user1 = console.processStartPageCommand();
+//            if (user1 != null) {
+//                console.pageForRegisteredUser(user1);
+//            }
+//        }
     }
 }

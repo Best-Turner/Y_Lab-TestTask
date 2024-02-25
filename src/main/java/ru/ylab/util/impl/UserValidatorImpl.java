@@ -7,7 +7,6 @@ import ru.ylab.model.WaterMeter;
 import ru.ylab.service.UserService;
 import ru.ylab.util.UserValidator;
 
-import java.util.Collections;
 import java.util.List;
 
 public class UserValidatorImpl implements UserValidator {
@@ -29,7 +28,7 @@ public class UserValidatorImpl implements UserValidator {
         if (inputName == null || inputName.isBlank()) {
             inputName = "<Anonymous>";
         }
-        User user = new User(++counter, inputName, inputEmail, inputPassword, Role.USER);
+        User user = new User(inputName, inputEmail, inputPassword, Role.USER);
         userService.saveUser(user);
         return true;
     }
@@ -50,14 +49,10 @@ public class UserValidatorImpl implements UserValidator {
     }
 
     @Override
-    public boolean isUnique(String email) {
-        boolean exist = userService.isExist(email);
-        if (exist) {
-            System.out.println("This email already is registered");
-            return true;
-        }
-        return !validateEmail(email);
+    public boolean checkEmail(String email) {
+        return validateEmail(email) && isUnique(email);
     }
+
 
     @Override
     public boolean delete(String email) {
@@ -82,13 +77,13 @@ public class UserValidatorImpl implements UserValidator {
         if (newName.isBlank() || newName == null) {
             newName = "<Anonymous>";
         }
-        User newUser = new User(owner.getId(), newName, newEmail, newPassword, Role.USER);
+        User newUser = new User(newName, newEmail, newPassword, Role.USER);
         userService.updateUser(oldEmail, newUser);
     }
 
     private boolean canChangeEmail(String newEmail) {
         boolean isChange = true;
-        if (!validateEmail(newEmail) && !isUnique(newEmail)) {
+        if (!validateEmail(newEmail) && !checkEmail(newEmail)) {
             System.out.println("Email remained unchanged");
             isChange = false;
         }
@@ -116,6 +111,7 @@ public class UserValidatorImpl implements UserValidator {
         return users;
     }
 
+
     @Override
     public boolean isAdmin(User user) {
         return user.getRole().equals(Role.ADMIN);
@@ -137,15 +133,23 @@ public class UserValidatorImpl implements UserValidator {
     }
 
 
+    private boolean isUnique(String email) {
+        if (!userService.isExist(email)) {
+            System.out.println("Такой адрес электронной почты уже зарегистрирован");
+            return false;
+        }
+        return true;
+    }
+
     private boolean validateEmail(String email) {
         if (email == null || email.isBlank()) {
-            System.out.println("Email con not be empty");
+            System.out.println("Адрес электронной почты не может быть пустым");
             return false;
         }
         if (email.endsWith("@mail.ru") || email.endsWith("@gmail.com")) {  // простая валидация email
             return true;
         }
-        System.out.println("Incorrect format email");
+        System.out.println("Неверный формат электронной почты");
         return false;
     }
 
@@ -155,7 +159,7 @@ public class UserValidatorImpl implements UserValidator {
 
     private boolean validatePassword(String password) {
         if (password == null || password.isBlank() || password.length() < 4) {
-            System.out.println("Incorrect password. Password can not be empty. Email must contain at least 4 characters");
+            System.out.println("Пароль должен содержать не менее 4 символов");
             return false;
         }
         return true;

@@ -42,14 +42,12 @@ public class User {
     /**
      * Constructor for the User class.
      *
-     * @param id
      * @param name     The name of the user.
      * @param email    The name of the user.
      * @param password The password of the user.
      * @param role     The password of the user.
      */
-    public User(Long id, String name, String email, String password, Role role) {
-        this.id = id;
+    public User(String name, String email, String password, Role role) {
         this.name = name;
         this.email = email;
         this.password = password;

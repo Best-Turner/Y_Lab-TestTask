@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface WaterCounterService {
 
-    void save(WaterMeter waterCounter) throws WaterCounterNotFoundException;
+    void save(WaterMeter waterCounter);
 
     WaterMeter getWaterCounter(String serialNumber) throws WaterCounterNotFoundException;
 

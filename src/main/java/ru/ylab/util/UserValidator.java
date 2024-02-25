@@ -10,7 +10,7 @@ public interface UserValidator {
 
     boolean isRegister(String email, String password);
 
-    boolean isUnique(String email);
+    boolean checkEmail(String email);
 
     boolean delete(String email);
 

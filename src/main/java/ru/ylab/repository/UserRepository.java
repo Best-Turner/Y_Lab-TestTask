@@ -208,7 +208,7 @@ public class UserRepository {
             String password = resultSet.getString("password");
             String roleFromDb = resultSet.getString("role");
             Role role = Role.valueOf(roleFromDb);
-            userFromDb = new User(id, name, emailFromDb, password, role);
+            userFromDb = new User(name, emailFromDb, password, role);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

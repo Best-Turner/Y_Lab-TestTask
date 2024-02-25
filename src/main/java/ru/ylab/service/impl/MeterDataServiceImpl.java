@@ -55,12 +55,12 @@ public class MeterDataServiceImpl implements MeterDataService {
      * Submits a value for the specified water counter, updating the current value.
      *
      * @param waterMeterId The id of the water counter.
-     * @param value        The value to be submitted.
+     * @param value   The value to be submitted.
      * @return True if the submission was successful, false otherwise.
      * @throws InvalidDataException If the submitted value is less than the current value.
      */
     @Override
-    public boolean submitValue(long waterMeterId, Float value) throws InvalidDataException, WaterCounterNotFoundException {
+    public boolean submitValue(long waterMeterId, Float value) throws InvalidDataException{
         if (!canChangeDate(waterMeterId)) {
             return false;
         }
