@@ -4,5 +4,6 @@
     <file url="file://$PROJECT_DIR$/src/main/java/ru/ylab/repository/MeterDataRepository.java" dialect="GenericSQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/ru/ylab/repository/UserRepository.java" dialect="PostgreSQL" />
     <file url="file://$PROJECT_DIR$/src/main/java/ru/ylab/repository/WaterCounterRepository.java" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/src/test/java/ru/ylab/repository/UserRepositoryTest.java" dialect="PostgreSQL" />
   </component>
 </project>

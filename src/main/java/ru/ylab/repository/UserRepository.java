@@ -44,7 +44,6 @@ public class UserRepository {
             if (resultSet.next()) {
                 userFromDb = userFromIncomingDatabaseData(resultSet);
             }
-
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -75,13 +74,13 @@ public class UserRepository {
     public void save(User user) {
         sql = "INSERT INTO model.users (name, email, password, role) VALUES(?,?,?,?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            connection.setAutoCommit(true);
             preparedStatement.setString(1, user.getName());
             preparedStatement.setString(2, user.getEmail());
             preparedStatement.setString(3, user.getPassword());
             preparedStatement.setObject(4, user.getRole(), Types.OTHER);
             preparedStatement.executeUpdate();
-            connection.commit();
-
+            //connection.commit();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -98,9 +97,9 @@ public class UserRepository {
         sql = "DELETE FROM model.users WHERE id = " + user.getId();
         boolean executeResult = false;
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            ResultSet resultSet = preparedStatement.executeQuery();
-            if (resultSet.next()) {
-                executeResult = resultSet.getBoolean(1);
+            int result = preparedStatement.executeUpdate();
+            if (result == 1) {
+                executeResult = true;
             }
 
         } catch (SQLException e) {
@@ -181,7 +180,7 @@ public class UserRepository {
 
 
     private User userFromIncomingDatabaseData(ResultSet resultSet) {
-        User userFromDb = null;
+        User userFromDb;
         try {
             long id = resultSet.getLong("id");
             String name = resultSet.getString("name");

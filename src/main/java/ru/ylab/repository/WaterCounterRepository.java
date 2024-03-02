@@ -57,12 +57,12 @@ public class WaterCounterRepository {
     public void addWaterCounter(WaterMeter waterCounter) {
         sql = "INSERT INTO model.water_meters(serial_number, type, current_value, owner) VALUES(?,?,?,?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            connection.setAutoCommit(true);
             preparedStatement.setString(1, waterCounter.getSerialNumber());
             preparedStatement.setObject(2, waterCounter.getType(), Types.OTHER);
             preparedStatement.setFloat(3, waterCounter.getCurrentValue());
             preparedStatement.setLong(4, waterCounter.getOwner().getId());
             preparedStatement.executeUpdate();
-            connection.commit();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -130,10 +130,10 @@ public class WaterCounterRepository {
     public void updateCurrentValue(long waterMeterId, float currentValue) {
         sql = "UPDATE model.water_meters wm SET current_value = ? WHERE id = ?";
         try (PreparedStatement preparedStatement1 = connection.prepareStatement(sql)) {
+            connection.setAutoCommit(true);
             preparedStatement1.setFloat(1, currentValue);
             preparedStatement1.setLong(2, waterMeterId);
             preparedStatement1.executeUpdate();
-            connection.commit();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

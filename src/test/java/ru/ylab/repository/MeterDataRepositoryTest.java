@@ -2,20 +2,38 @@ package ru.ylab.repository;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.containers.wait.strategy.Wait;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 import ru.ylab.model.MeterData;
 
 import java.sql.Connection;
 import java.util.List;
 
 import static org.junit.Assert.*;
-
+@Testcontainers
 public class MeterDataRepositoryTest {
     private final static long ID = 1L;
     private final static Float VALUE = 123f;
     private final static String DATE = "2024-01";
+
+    private static final String DB_NAME = "testDB";
+    private static final String USERNAME = "testUser";
+    private static final String PASSWORD_DB = "testPass";
     private MeterDataRepository repository;
 
     private Connection connection;
+
+    @Container
+    public static PostgreSQLContainer<?> postgresqlContainer = new PostgreSQLContainer<>(
+            DockerImageName.parse("postgres:latest"))
+            .withDatabaseName(DB_NAME)
+            .withUsername(USERNAME)
+            .withPassword(PASSWORD_DB)
+            .waitingFor(Wait.forLogMessage(".*database system is ready to accept connections.*\\n", 2));
+
 
     @Before
     public void setUp() throws Exception {

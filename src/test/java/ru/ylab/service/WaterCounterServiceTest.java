@@ -35,7 +35,7 @@ public class WaterCounterServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        owner = new User(1L, "user", "user@mai.ru", "1234", Role.USER);
+        owner = new User("user", "user@mai.ru", "1234", Role.USER);
         waterCounter = new WaterMeter(SERIAL_NUMBER, TYPE, VALUE, owner);
         MockitoAnnotations.openMocks(this);
     }
