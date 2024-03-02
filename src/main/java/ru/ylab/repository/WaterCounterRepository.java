@@ -17,7 +17,6 @@ import java.util.Optional;
 public class WaterCounterRepository {
 
     private final Connection connection;
-    private PreparedStatement preparedStatement;
     private String sql;
 
     /**
@@ -38,8 +37,7 @@ public class WaterCounterRepository {
     public Optional<WaterMeter> getWaterCounter(String serialNumber) {
         sql = "SELECT * FROM model.water_meters WHERE serial_number = ?";
         WaterMeter waterMeterFromDb = null;
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, serialNumber);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
@@ -58,16 +56,13 @@ public class WaterCounterRepository {
      */
     public void addWaterCounter(WaterMeter waterCounter) {
         sql = "INSERT INTO model.water_meters(serial_number, type, current_value, owner) VALUES(?,?,?,?)";
-        try {
-
-            preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, waterCounter.getSerialNumber());
             preparedStatement.setObject(2, waterCounter.getType(), Types.OTHER);
             preparedStatement.setFloat(3, waterCounter.getCurrentValue());
             preparedStatement.setLong(4, waterCounter.getOwner().getId());
             preparedStatement.executeUpdate();
             connection.commit();
-            preparedStatement.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -84,14 +79,12 @@ public class WaterCounterRepository {
     public boolean isExist(String serialNumber) {
         boolean executeResult = false;
         sql = "SELECT EXISTS(SELECT 1 FROM model.water_meters w WHERE w.serial_number = ?)";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, serialNumber);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 executeResult = resultSet.getBoolean(1);
             }
-            preparedStatement.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -106,13 +99,11 @@ public class WaterCounterRepository {
     public List<WaterMeter> getAllWaterCounters() {
         List<WaterMeter> waterMeters = new ArrayList<>();
         sql = "SELECT * FROM model.water_meters";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 waterMeters.add(waterMeterFromIncomingDatabaseData(resultSet));
             }
-            preparedStatement.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -123,14 +114,12 @@ public class WaterCounterRepository {
         sql = "SELECT * FROM model.water_meters wm WHERE wm.id = ?";
         WaterMeter waterMeterFromDb = null;
 
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setLong(1, waterCounterId);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 waterMeterFromDb = waterMeterFromIncomingDatabaseData(resultSet);
             }
-            preparedStatement.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -139,7 +128,7 @@ public class WaterCounterRepository {
 
 
     public void updateCurrentValue(long waterMeterId, float currentValue) {
-        sql = "UPDATE model.water_meters SET current_value = ? WHERE id = ?";
+        sql = "UPDATE model.water_meters wm SET current_value = ? WHERE id = ?";
         try (PreparedStatement preparedStatement1 = connection.prepareStatement(sql)) {
             preparedStatement1.setFloat(1, currentValue);
             preparedStatement1.setLong(2, waterMeterId);

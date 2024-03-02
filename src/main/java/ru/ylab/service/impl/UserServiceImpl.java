@@ -1,12 +1,16 @@
 package ru.ylab.service.impl;
 
+import ru.ylab.exception.InvalidDataException;
 import ru.ylab.exception.UserNotFoundException;
 import ru.ylab.model.User;
 import ru.ylab.model.WaterMeter;
 import ru.ylab.repository.UserRepository;
 import ru.ylab.service.UserService;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 public class UserServiceImpl implements UserService {
 
@@ -29,7 +33,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public User getUser(String email) throws UserNotFoundException {
         return repository.getUser(email).orElseThrow(() ->
-                new UserNotFoundException("User with this" + email + " is not registered"));
+                new UserNotFoundException("Пользователь с таким - " + email + " не зарегистрирован"));
     }
 
     @Override
@@ -59,22 +63,20 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public boolean checkUserCredentials(User userByEmail, String inputPassword) throws UserNotFoundException {
-        boolean isAuthentication = false;
-        if (userByEmail == null) {
-            throw new UserNotFoundException("You haven't registered yet");
+    public boolean checkUserCredentials(String inputEmail, String inputPassword) throws UserNotFoundException, InvalidDataException {
 
-        } else {
-            if (userByEmail.getPassword().equals(inputPassword)) {
-                isAuthentication = true;
-            }
+        if (!isExist(inputEmail)) {
+            throw new UserNotFoundException("Пользователь с таким email - " + inputEmail + " не зарегистрирован.");
         }
-        return isAuthentication;
+        User userByEmail = getUser(inputEmail);
+        if (!userByEmail.getPassword().equals(inputPassword)) {
+            throw new InvalidDataException("Неверный пароль");
+        }
+        return true;
     }
 
     @Override
     public List<WaterMeter> waterCounters(User owner) {
-
         List<WaterMeter> waterCounters = repository.getWaterCounters(owner.getId());
         if (waterCounters.isEmpty()) {
             return Collections.emptyList();
@@ -83,19 +85,8 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User getUserById(int index) {
+    public User getUserById(long index) {
         return repository.getUser(index);
     }
-
-//    @Override
-//    public boolean addWaterCounter(User user, WaterMeter waterCounter) {
-//        String email = user.getEmail();
-//        Set<WaterMeter> waterCounters = repository.getWaterCounters(email);
-//        if (waterCounters.contains(waterCounter)) {
-//            return false;
-//        }
-//        repository.addWaterCounterToUser(user.getEmail(), waterCounter);
-//        return true;
-//    }
 
 }

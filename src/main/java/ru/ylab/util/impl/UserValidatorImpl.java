@@ -1,17 +1,17 @@
 package ru.ylab.util.impl;
 
+import ru.ylab.exception.InvalidDataException;
 import ru.ylab.exception.UserNotFoundException;
 import ru.ylab.model.Role;
 import ru.ylab.model.User;
 import ru.ylab.model.WaterMeter;
 import ru.ylab.service.UserService;
+import ru.ylab.util.AuditLogger;
 import ru.ylab.util.UserValidator;
 
 import java.util.List;
 
 public class UserValidatorImpl implements UserValidator {
-
-    private static long counter;
 
     private final UserService userService;
 
@@ -22,7 +22,7 @@ public class UserValidatorImpl implements UserValidator {
     @Override
     public boolean createUser(String inputName, String inputEmail, String inputPassword) {
 
-        if (!validate(inputEmail, inputPassword)) {
+        if (!authenticateUser(inputEmail, inputPassword)) {
             return false;
         }
         if (inputName == null || inputName.isBlank()) {
@@ -30,22 +30,27 @@ public class UserValidatorImpl implements UserValidator {
         }
         User user = new User(inputName, inputEmail, inputPassword, Role.USER);
         userService.saveUser(user);
+        AuditLogger.log("Новый пользователь сохранен");
         return true;
     }
 
 
     @Override
     public boolean isRegister(String email, String password) {
-        User userByEmail = findUserByEmail(email);
+        boolean isRegisterResult = false;
+        boolean isCorrectEmail = validateEmail(email);
+        if (!isCorrectEmail) {
+            return isRegisterResult;
+        }
         if (!validatePassword(password)) {
-            return false;
+            return isRegisterResult;
         }
         try {
-            return userService.checkUserCredentials(userByEmail, password);
-        } catch (UserNotFoundException e) {
+            isRegisterResult = userService.checkUserCredentials(email, password);
+        } catch (UserNotFoundException | InvalidDataException e) {
             System.out.println(e.getMessage());
         }
-        return false;
+        return isRegisterResult;
     }
 
     @Override
@@ -62,38 +67,12 @@ public class UserValidatorImpl implements UserValidator {
         return false;
     }
 
-    @Override
-    public void updateUser(User owner, String newName, String newEmail, String newPassword) {
-
-        String oldEmail = owner.getEmail();
-        String oldPassword = owner.getPassword();
-        if (!canChangeEmail(newEmail)) {
-            newEmail = oldEmail;
-        }
-        if (!validatePassword(newPassword)) {
-            System.out.println("Password remained unchanged");
-            newPassword = oldPassword;
-        }
-        if (newName.isBlank() || newName == null) {
-            newName = "<Anonymous>";
-        }
-        User newUser = new User(newName, newEmail, newPassword, Role.USER);
-        userService.updateUser(oldEmail, newUser);
-    }
-
-    private boolean canChangeEmail(String newEmail) {
-        boolean isChange = true;
-        if (!validateEmail(newEmail) && !checkEmail(newEmail)) {
-            System.out.println("Email remained unchanged");
-            isChange = false;
-        }
-        return isChange;
-    }
 
     @Override
     public User findUserByEmail(String email) {
         if (!validateEmail(email)) {
-            System.out.println("Incorrect entered email");
+            AuditLogger.log("Ошибка: Не корректно введенный email");
+            System.out.println("Не корректно введенный email");
             return null;
         }
         try {
@@ -107,20 +86,8 @@ public class UserValidatorImpl implements UserValidator {
 
     @Override
     public List<User> allUsers() {
-        List<User> users = userService.allUsers();
-        return users;
+        return userService.allUsers();
     }
-
-
-    @Override
-    public boolean isAdmin(User user) {
-        return user.getRole().equals(Role.ADMIN);
-    }
-
-//    @Override
-//    public boolean addCounter(User user, WaterMeter waterCounter) {
-//        return userService.addWaterCounter(user, waterCounter);
-//    }
 
     @Override
     public List<WaterMeter> getWaterCounters(User owner) {
@@ -128,13 +95,23 @@ public class UserValidatorImpl implements UserValidator {
     }
 
     @Override
-    public User getById(int index) {
-        return userService.getUserById(index);
+    public User getById(String inputUserId) throws InvalidDataException {
+
+        long userId = 0;
+        try {
+            userId = Long.parseLong(inputUserId);
+        } catch (NumberFormatException e) {
+            AuditLogger.log("Ошибка: Ожидается число.");
+            throw new InvalidDataException("Ожидается число.");
+        }
+
+        return userService.getUserById(userId);
     }
 
 
     private boolean isUnique(String email) {
-        if (!userService.isExist(email)) {
+        if (userService.isExist(email)) {
+            AuditLogger.log("Ошибка: Такой адрес электронной почты уже зарегистрирован");
             System.out.println("Такой адрес электронной почты уже зарегистрирован");
             return false;
         }
@@ -143,22 +120,26 @@ public class UserValidatorImpl implements UserValidator {
 
     private boolean validateEmail(String email) {
         if (email == null || email.isBlank()) {
+            AuditLogger.log("Ошибка: Адрес электронной почты не может быть пустым");
             System.out.println("Адрес электронной почты не может быть пустым");
             return false;
         }
-        if (email.endsWith("@mail.ru") || email.endsWith("@gmail.com")) {  // простая валидация email
+        if (email.endsWith("@mail.ru") || email.endsWith("@gmail.com")) {
+            AuditLogger.log("Корректные данные");
             return true;
         }
         System.out.println("Неверный формат электронной почты");
+        AuditLogger.log("Ошибка: Неверный формат электронной почты");
         return false;
     }
 
-    private boolean validate(String name, String password) {
+    private boolean authenticateUser(String name, String password) {
         return validateEmail(name) && validatePassword(password);
     }
 
     private boolean validatePassword(String password) {
         if (password == null || password.isBlank() || password.length() < 4) {
+            AuditLogger.log("Ошибка: Пароль должен содержать не менее 4 символов");
             System.out.println("Пароль должен содержать не менее 4 символов");
             return false;
         }

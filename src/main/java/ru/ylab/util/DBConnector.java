@@ -13,7 +13,6 @@ public class DBConnector {
     private DBConnector() {
     }
 
-
     private static String[] getProperties(String path) {
         ClassLoader loader = ClassLoader.getSystemClassLoader();
         final String[] connectionData = new String[3];

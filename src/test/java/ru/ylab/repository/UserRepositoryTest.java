@@ -7,7 +7,9 @@ import ru.ylab.model.User;
 import ru.ylab.util.DBConnector;
 
 import java.sql.Connection;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
@@ -83,7 +85,7 @@ public class UserRepositoryTest {
 
     @Test
     public void whenGetUsersThenReturnMapUser() {
-        List<User> actual= repository.usersGroup();
+        List<User> actual = repository.usersGroup();
         assertEquals(ArrayList.class, actual.getClass());
         assertEquals(users, actual);
     }

@@ -18,7 +18,6 @@ import java.util.Optional;
 public class UserRepository {
 
     private final Connection connection;
-    private PreparedStatement preparedStatement;
     private String sql;
 
     /**
@@ -39,14 +38,13 @@ public class UserRepository {
     public Optional<User> getUser(String email) {
         User userFromDb = null;
         sql = "SELECT * FROM model.users WHERE email = ?";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, email);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 userFromDb = userFromIncomingDatabaseData(resultSet);
             }
-            preparedStatement.close();
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -56,14 +54,13 @@ public class UserRepository {
     public User getUser(long id) {
         User userFromDb = null;
         sql = "SELECT * FROM model.users u WHERE u.id = ?";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setLong(1, id);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 userFromDb = userFromIncomingDatabaseData(resultSet);
             }
-            preparedStatement.close();
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -77,18 +74,16 @@ public class UserRepository {
      */
     public void save(User user) {
         sql = "INSERT INTO model.users (name, email, password, role) VALUES(?,?,?,?)";
-        try {
-
-            preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, user.getName());
             preparedStatement.setString(2, user.getEmail());
             preparedStatement.setString(3, user.getPassword());
             preparedStatement.setObject(4, user.getRole(), Types.OTHER);
             preparedStatement.executeUpdate();
             connection.commit();
-            preparedStatement.close();
+
         } catch (SQLException e) {
-            throw new RuntimeException(e); //test@mail.ru
+            throw new RuntimeException(e);
         }
     }
 
@@ -102,13 +97,12 @@ public class UserRepository {
     public boolean delete(User user) {
         sql = "DELETE FROM model.users WHERE id = " + user.getId();
         boolean executeResult = false;
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 executeResult = resultSet.getBoolean(1);
             }
-            preparedStatement.close();
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -124,14 +118,13 @@ public class UserRepository {
     public boolean isExist(String email) {
         boolean executeResult = false;
         sql = "SELECT EXISTS(SELECT 1 FROM model.users WHERE email = ?)";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setString(1, email);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 executeResult = resultSet.getBoolean(1);
             }
-            preparedStatement.close();
+
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -146,13 +139,11 @@ public class UserRepository {
     public List<User> usersGroup() {
         List<User> users = new ArrayList<>();
         sql = "SELECT * FROM model.users";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
                 users.add(userFromIncomingDatabaseData(resultSet));
             }
-            preparedStatement.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -168,8 +159,8 @@ public class UserRepository {
     public List<WaterMeter> getWaterCounters(long ownerId) {
         List<WaterMeter> meters = new ArrayList<>();
         sql = "SELECT * FROM model.water_meters w WHERE w.owner = ?";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+
             preparedStatement.setLong(1, ownerId);
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -182,22 +173,12 @@ public class UserRepository {
                 buildNewWaterMeter.setId(id);
                 meters.add(buildNewWaterMeter);
             }
-            preparedStatement.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
         return meters;
     }
 
-//    /**
-//     * Adds a water counter to the list of water counters associated with a user.
-//     *
-//     * @param email        The email address of the user.
-//     * @param waterCounter The water counter to be added.
-//     */
-//    public void addWaterCounterToUser(String email, WaterMeter waterCounter) {
-//        users.get(email).getWaterCounterList().add(waterCounter);
-//    }
 
     private User userFromIncomingDatabaseData(ResultSet resultSet) {
         User userFromDb = null;
@@ -209,6 +190,7 @@ public class UserRepository {
             String roleFromDb = resultSet.getString("role");
             Role role = Role.valueOf(roleFromDb);
             userFromDb = new User(name, emailFromDb, password, role);
+            userFromDb.setId(id);
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

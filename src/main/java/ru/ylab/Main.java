@@ -67,17 +67,8 @@ public class Main {
         MeterDataService dataStorageService = new MeterDataServiceImpl(meterDataRepository);
         WaterCounterService counterService = new WaterCounterServiceImpl(counterRepository, dataStorageService);
         WaterCounterValidator counterValidator = new WaterCounterValidatorImpl(counterService);
-       // ConsoleServiceMediator console = new ConsoleServiceMediator(userValidator, counterValidator);
 
         Menu menu = new EntryMenu(userValidator, counterValidator);
         menu.start();
-
-//
-//        while (true) {
-//            User user1 = console.processStartPageCommand();
-//            if (user1 != null) {
-//                console.pageForRegisteredUser(user1);
-//            }
-//        }
     }
 }

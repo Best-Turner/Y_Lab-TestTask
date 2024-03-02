@@ -1,5 +1,6 @@
 package ru.ylab.util;
 
+import ru.ylab.exception.InvalidDataException;
 import ru.ylab.model.User;
 import ru.ylab.model.WaterMeter;
 
@@ -14,18 +15,13 @@ public interface UserValidator {
 
     boolean delete(String email);
 
-    void updateUser(User owner, String name, String email, String password);
-
     User findUserByEmail(String email);
 
     List<User> allUsers();
 
-    boolean isAdmin(User user);
-
-//    boolean addCounter(User user, WaterMeter waterCounter);
 
     List<WaterMeter> getWaterCounters(User owner);
 
-    User getById(int index);
+    User getById(String inputId) throws InvalidDataException;
 
 }

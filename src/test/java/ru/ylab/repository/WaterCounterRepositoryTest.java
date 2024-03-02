@@ -8,7 +8,9 @@ import ru.ylab.model.User;
 import ru.ylab.model.WaterMeter;
 
 import java.sql.Connection;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.*;
 
@@ -81,7 +83,6 @@ public class WaterCounterRepositoryTest {
     public void whenGetNotExistWaterCounterThenReturnFalse() {
         assertFalse(repository.isExist(SERIAL_NUMBER + "123"));
     }
-
 
 
     @Test

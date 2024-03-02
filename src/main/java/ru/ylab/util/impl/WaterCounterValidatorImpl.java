@@ -94,13 +94,8 @@ public class WaterCounterValidatorImpl implements WaterCounterValidator {
 
 
     @Override
-    public List<WaterMeter> getWaterCounters() {
-        return service.allWaterCounter();
-    }
-
-    @Override
     public WaterMeter getWaterMeterById(String waterMeterId) throws InvalidDataException {
-        long inputWaterMeterId = 0;
+        long inputWaterMeterId;
         try {
             inputWaterMeterId = Long.parseLong(waterMeterId);
         } catch (NumberFormatException e) {

@@ -1,11 +1,9 @@
 package ru.ylab.service.impl;
 
 import ru.ylab.exception.InvalidDataException;
-import ru.ylab.exception.WaterCounterNotFoundException;
 import ru.ylab.model.MeterData;
 import ru.ylab.repository.MeterDataRepository;
 import ru.ylab.service.MeterDataService;
-import ru.ylab.service.WaterCounterService;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
@@ -25,7 +23,7 @@ public class MeterDataServiceImpl implements MeterDataService {
     /**
      * Constructs a new `MeterDataServiceImpl` with the specified `WaterMeterRepository`.
      *
-     * @param repository          The repository to be used by the service implementation.
+     * @param repository The repository to be used by the service implementation.
      */
     public MeterDataServiceImpl(MeterDataRepository repository) {
         this.repository = repository;
@@ -44,7 +42,7 @@ public class MeterDataServiceImpl implements MeterDataService {
      * Registers a water counter with the given serial number.
      *
      * @param waterMeterId The id of the water counter to register.
-     * @param value The value water meter to be saved.
+     * @param value        The value water meter to be saved.
      */
     @Override
     public void registrationCounter(long waterMeterId, float value) {
@@ -55,12 +53,12 @@ public class MeterDataServiceImpl implements MeterDataService {
      * Submits a value for the specified water counter, updating the current value.
      *
      * @param waterMeterId The id of the water counter.
-     * @param value   The value to be submitted.
+     * @param value        The value to be submitted.
      * @return True if the submission was successful, false otherwise.
      * @throws InvalidDataException If the submitted value is less than the current value.
      */
     @Override
-    public boolean submitValue(long waterMeterId, Float value) throws InvalidDataException{
+    public boolean submitValue(long waterMeterId, Float value) throws InvalidDataException {
         if (!canChangeDate(waterMeterId)) {
             return false;
         }

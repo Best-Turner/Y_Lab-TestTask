@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import ru.ylab.exception.InvalidDataException;
 import ru.ylab.exception.UserNotFoundException;
 import ru.ylab.model.Role;
 import ru.ylab.model.User;
@@ -31,7 +32,8 @@ public class UserServiceTest {
 
     @Before
     public void setUp() throws Exception {
-        user = new User(PLAYER_ID, NAME, EMAIL, PASSWORD, ADMIN);
+        user = new User(NAME, EMAIL, PASSWORD, ADMIN);
+        user.setId(PLAYER_ID);
         MockitoAnnotations.openMocks(this);
     }
 
@@ -99,14 +101,14 @@ public class UserServiceTest {
     }
 
     @Test
-    public void whenInputPasswordEqualsUserPasswordThanReturnTrue() throws UserNotFoundException {
-        boolean actual = service.checkUserCredentials(user, PASSWORD);
+    public void whenInputPasswordEqualsUserPasswordThanReturnTrue() throws UserNotFoundException, InvalidDataException {
+        boolean actual = service.checkUserCredentials(EMAIL, PASSWORD);
         assertTrue(actual);
     }
 
     @Test
-    public void whenInputPasswordNotEqualsUserPasswordThanReturnFalse() throws UserNotFoundException {
-        boolean actual = service.checkUserCredentials(user, PASSWORD.concat("1234"));
+    public void whenInputPasswordNotEqualsUserPasswordThanReturnFalse() throws UserNotFoundException, InvalidDataException {
+        boolean actual = service.checkUserCredentials(EMAIL, PASSWORD.concat("1234"));
         assertFalse(actual);
     }
 

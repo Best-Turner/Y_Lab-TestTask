@@ -16,11 +16,11 @@ public class MeterDataRepositoryTest {
     private MeterDataRepository repository;
 
     private Connection connection;
+
     @Before
     public void setUp() throws Exception {
         repository = new MeterDataRepository(connection);
     }
-
 
 
     @Test

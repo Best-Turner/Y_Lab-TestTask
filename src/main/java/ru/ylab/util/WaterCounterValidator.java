@@ -17,12 +17,9 @@ public interface WaterCounterValidator {
 
     void changeCurrentValue(String serialNumber, String value) throws InvalidDataException, WaterCounterNotFoundException;
 
-    List<WaterMeter> getWaterCounters();
-
     WaterMeter getWaterMeterById(String waterMeterId) throws InvalidDataException;
 
     WaterMeter getWaterMeterBySerialNumber(String serialNumber) throws InvalidDataException, WaterCounterNotFoundException;
-
 
 
 }

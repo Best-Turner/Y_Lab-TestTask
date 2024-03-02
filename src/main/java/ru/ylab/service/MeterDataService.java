@@ -3,7 +3,6 @@ package ru.ylab.service;
 import ru.ylab.exception.InvalidDataException;
 import ru.ylab.exception.WaterCounterNotFoundException;
 import ru.ylab.model.MeterData;
-import ru.ylab.model.WaterMeter;
 
 import java.util.List;
 

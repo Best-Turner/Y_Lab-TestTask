@@ -29,6 +29,15 @@ public class WaterCounterServiceImpl implements WaterCounterService {
         if (!repository.isExist(waterCounter.getSerialNumber())) {
             repository.addWaterCounter(waterCounter);
         }
+        if (waterCounter.getId() == null) {
+            try {
+                waterCounter.setId(getIdBySerialNumber(waterCounter.getSerialNumber()));
+            } catch (WaterCounterNotFoundException e) {
+                System.out.println(e.getMessage());
+                return;
+            }
+        }
+
         meterDataService.registrationCounter(waterCounter.getId(), waterCounter.getCurrentValue());
     }
 
@@ -36,7 +45,7 @@ public class WaterCounterServiceImpl implements WaterCounterService {
     public WaterMeter getWaterCounter(String serialNumber) throws WaterCounterNotFoundException {
         Optional<WaterMeter> waterCounter = repository.getWaterCounter(serialNumber);
         return waterCounter.orElseThrow(() ->
-                new WaterCounterNotFoundException("WaterCounter with this serial number = " + serialNumber + " not found"));
+                new WaterCounterNotFoundException("Счетчик с таким серийным номером = " + serialNumber + " не найден"));
 
     }
 
@@ -80,7 +89,7 @@ public class WaterCounterServiceImpl implements WaterCounterService {
 
     private long getIdBySerialNumber(String serialNumber) throws WaterCounterNotFoundException {
         WaterMeter waterMeterNotFound = repository.getWaterCounter(serialNumber)
-                .orElseThrow(() -> new WaterCounterNotFoundException("Water meter not found"));
+                .orElseThrow(() -> new WaterCounterNotFoundException("Счетчик не найде"));
         return waterMeterNotFound.getId();
     }
 }

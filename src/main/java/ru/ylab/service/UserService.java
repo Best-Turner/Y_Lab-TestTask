@@ -1,5 +1,6 @@
 package ru.ylab.service;
 
+import ru.ylab.exception.InvalidDataException;
 import ru.ylab.exception.UserNotFoundException;
 import ru.ylab.model.User;
 import ru.ylab.model.WaterMeter;
@@ -46,24 +47,14 @@ public interface UserService {
     /**
      * Check users by their credentials.
      *
-     * @param userByEmail User's identifier.
-     * @param password    User's password.
+     * @param email    User's email.
+     * @param password User's password.
      * @return true if user is registrartion.
      */
 
-    boolean checkUserCredentials(User userByEmail, String password) throws UserNotFoundException;
-//
-//    /**
-//     * Add new water counter.
-//     *
-//     * @param user         User owner counter.
-//     * @param waterCounter new counter.
-//     * @return true if added.
-//     */
-
-//    boolean addWaterCounter(User user, WaterMeter waterCounter);
+    boolean checkUserCredentials(String email, String password) throws UserNotFoundException, InvalidDataException;
 
     List<WaterMeter> waterCounters(User owner);
 
-    User getUserById(int index);
+    User getUserById(long index);
 }

@@ -8,7 +8,6 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 /**
  * The `CounterDataStorageRepository` class serves as a repository for managing counter data storage operations.
@@ -19,7 +18,6 @@ import java.util.Map;
 public class MeterDataRepository {
 
     private final Connection connection;
-    private PreparedStatement preparedStatement;
     private String sql;
 
     /**
@@ -36,8 +34,7 @@ public class MeterDataRepository {
      */
     public void addValue(MeterData meterData) {
         sql = "INSERT INTO model.meter_data(water_id, date, value) VALUES(?,?,?)";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             long waterMeterId = meterData.getWaterMeterId();
             String date = meterData.getDate();
             float value = meterData.getValue();
@@ -61,8 +58,7 @@ public class MeterDataRepository {
     public boolean isExist(long waterMeterId) {
         boolean executeResult = false;
         sql = "SELECT EXISTS(SELECT 1 FROM model.meter_data md WHERE md.water_id = ?)";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setLong(1, waterMeterId);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
@@ -85,15 +81,13 @@ public class MeterDataRepository {
     public Float getValue(long waterMeterId, String dateKey) {
         float valueFromDb = -1;
         sql = "SELECT * FROM model.meter_data md WHERE md.water_id = ? and md.date = ?";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setLong(1, waterMeterId);
             preparedStatement.setString(2, dateKey);
             ResultSet resultSet = preparedStatement.executeQuery();
             if (resultSet.next()) {
                 valueFromDb = resultSet.getFloat("value");
             }
-            preparedStatement.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -109,8 +103,7 @@ public class MeterDataRepository {
     public List<MeterData> getValuesByWaterMeterId(long waterMeterId) {
         List<MeterData> meterData = new ArrayList<>();
         sql = "SELECT * FROM model.meter_data md WHERE md.water_id = ?";
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setLong(1, waterMeterId);
             ResultSet resultSet = preparedStatement.executeQuery();
             while (resultSet.next()) {
@@ -119,7 +112,6 @@ public class MeterDataRepository {
                 float value = resultSet.getFloat("value");
                 meterData.add(new MeterData(id, date, value));
             }
-            preparedStatement.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -135,11 +127,9 @@ public class MeterDataRepository {
     public boolean delete(long waterMeterId) {
         sql = "DELETE FROM model.meter_date md WHERE md.water_id = ?";
         int result;
-        try {
-            preparedStatement = connection.prepareStatement(sql);
+        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
             preparedStatement.setLong(1, waterMeterId);
             result = preparedStatement.executeUpdate();
-            preparedStatement.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
