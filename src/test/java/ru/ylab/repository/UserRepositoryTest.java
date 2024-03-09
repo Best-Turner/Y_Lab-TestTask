@@ -3,7 +3,6 @@ package ru.ylab.repository;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Mock;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.junit.jupiter.Container;
@@ -11,7 +10,6 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import ru.ylab.model.Role;
 import ru.ylab.model.User;
-import ru.ylab.model.WaterMeter;
 
 import java.sql.Connection;
 import java.sql.DriverManager;

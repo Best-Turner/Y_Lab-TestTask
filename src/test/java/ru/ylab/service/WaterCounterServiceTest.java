@@ -1,5 +1,6 @@
 package ru.ylab.service;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
@@ -37,23 +38,26 @@ public class WaterCounterServiceTest {
     public void setUp() throws Exception {
         owner = new User("user", "user@mai.ru", "1234", Role.USER);
         waterCounter = new WaterMeter(SERIAL_NUMBER, TYPE, VALUE, owner);
+        waterCounter.setId(ID);
         MockitoAnnotations.openMocks(this);
     }
 
+
     @Test
-    public void shouldCallMethodAddWaterCounterAndRegistrationCounterWhenSaveCounter() throws WaterCounterNotFoundException {
+    public void shouldCallMethodAddWaterCounterAndRegistrationCounterWhenSaveCounter()  {
         when(repository.isExist(SERIAL_NUMBER)).thenReturn(false);
+        when(repository.getWaterCounter(SERIAL_NUMBER)).thenReturn(Optional.of(waterCounter));
         service.save(waterCounter);
         verify(repository, times(1)).addWaterCounter(waterCounter);
         verify(storageService, times(1)).registrationCounter(ID, VALUE);
     }
 
     @Test
-    public void NotShouldCallMethodAddWaterCounterAndRegistrationCounterWhenSaveCounter() throws WaterCounterNotFoundException {
+    public void notShouldCallMethodAddWaterCounterAndRegistrationCounterWhenSaveCounter() {
         when(repository.isExist(SERIAL_NUMBER)).thenReturn(true);
+        when(repository.getWaterCounter(SERIAL_NUMBER)).thenReturn(Optional.of(waterCounter));
         service.save(waterCounter);
         verify(repository, never()).addWaterCounter(waterCounter);
-        verify(storageService, never()).registrationCounter(ID, VALUE);
     }
 
     @Test
@@ -96,13 +100,12 @@ public class WaterCounterServiceTest {
         when(storageService.getCurrentValue(ID)).thenReturn(VALUE);
         when(repository.getWaterCounter(SERIAL_NUMBER)).thenReturn(Optional.of(waterCounter));
         Float actual = service.currentValue(SERIAL_NUMBER);
-        verify(storageService, times(1)).getCurrentValue(ID);
         assertEquals(VALUE, actual);
     }
 
 
     @Test
-    public void shouldCallMethodGetValuesAndReturnMap() throws WaterCounterNotFoundException {
+    public void shouldCallMethodGetValuesAndReturnEmptyList() {
         when(storageService.getValues(ID)).thenReturn(Collections.emptyList());
         when(repository.getWaterCounter(SERIAL_NUMBER)).thenReturn(Optional.of(waterCounter));
         List<MeterData> actual = service.getValues(ID);

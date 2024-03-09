@@ -89,7 +89,7 @@ public class WaterCounterServiceImpl implements WaterCounterService {
 
     private long getIdBySerialNumber(String serialNumber) throws WaterCounterNotFoundException {
         WaterMeter waterMeterNotFound = repository.getWaterCounter(serialNumber)
-                .orElseThrow(() -> new WaterCounterNotFoundException("Счетчик не найде"));
+                .orElseThrow(() -> new WaterCounterNotFoundException("Счетчик не найден"));
         return waterMeterNotFound.getId();
     }
 }

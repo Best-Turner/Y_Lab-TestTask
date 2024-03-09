@@ -35,6 +35,7 @@ public class MeterDataRepository {
     public void addValue(MeterData meterData) {
         sql = "INSERT INTO model.meter_data(water_id, date, value) VALUES(?,?,?)";
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            connection.setAutoCommit(true);
             long waterMeterId = meterData.getWaterMeterId();
             String date = meterData.getDate();
             float value = meterData.getValue();
@@ -42,8 +43,6 @@ public class MeterDataRepository {
             preparedStatement.setString(2, date);
             preparedStatement.setFloat(3, value);
             preparedStatement.executeUpdate();
-            connection.commit();
-            preparedStatement.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -64,7 +63,6 @@ public class MeterDataRepository {
             if (resultSet.next()) {
                 executeResult = resultSet.getBoolean(1);
             }
-            preparedStatement.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -125,9 +123,10 @@ public class MeterDataRepository {
      * @return True if the deletion was successful, false otherwise.
      */
     public boolean delete(long waterMeterId) {
-        sql = "DELETE FROM model.meter_date md WHERE md.water_id = ?";
+        sql = "DELETE FROM model.meter_data md WHERE md.water_id = ?";
         int result;
         try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
+            connection.setAutoCommit(true);
             preparedStatement.setLong(1, waterMeterId);
             result = preparedStatement.executeUpdate();
         } catch (SQLException e) {

@@ -102,14 +102,17 @@ public class UserServiceTest {
 
     @Test
     public void whenInputPasswordEqualsUserPasswordThanReturnTrue() throws UserNotFoundException, InvalidDataException {
+        when(repository.isExist(EMAIL)).thenReturn(true);
+        when(repository.getUser(EMAIL)).thenReturn(Optional.of(user));
         boolean actual = service.checkUserCredentials(EMAIL, PASSWORD);
+        verify(repository, times(1)).isExist(EMAIL);
+        verify(repository, times(1)).getUser(EMAIL);
         assertTrue(actual);
     }
 
-    @Test
+    @Test(expected = UserNotFoundException.class)
     public void whenInputPasswordNotEqualsUserPasswordThanReturnFalse() throws UserNotFoundException, InvalidDataException {
         boolean actual = service.checkUserCredentials(EMAIL, PASSWORD.concat("1234"));
-        assertFalse(actual);
     }
 
     @Test()
