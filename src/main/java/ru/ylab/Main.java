@@ -48,12 +48,10 @@ public class Main {
             Liquibase liquibase =
                     new Liquibase("db/changelog/changelog-root.xml",
                             new ClassLoaderResourceAccessor(), database);
-            liquibase.update();
+            liquibase.update("");
             System.out.println("Миграции успешно выполнены!");
 
-        } catch (DatabaseException ex) {
-            throw new RuntimeException(ex);
-        } catch (LiquibaseException ex) {
+        } catch (Exception ex) {
             throw new RuntimeException(ex);
         }
 
