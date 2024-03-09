@@ -1,0 +1,6 @@
+ru\ylab\service\CounterDataStorageServiceTest.class
+ru\ylab\service\UserServiceTest.class
+ru\ylab\repository\MeterDataRepositoryTest.class
+ru\ylab\repository\WaterMeterRepositoryTest.class
+ru\ylab\service\WaterCounterServiceTest.class
+ru\ylab\repository\UserRepositoryTest.class

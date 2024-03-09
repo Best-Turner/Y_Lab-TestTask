@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="2.2 insert water data" author="Aleksandr">
+        <loadUpdateData tableName="water_meters" schemaName="model" file="data/waterMeters.csv"
+                        relativeToChangelogFile="true" primaryKey="id"/>
+    </changeSet>
+
+</databaseChangeLog>

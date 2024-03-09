@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet id="1.2.1" author="Aleksandr">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="water_meters"/>
+            </not>
+        </preConditions>
+        <sql>CREATE TYPE type as enum('HOT', 'COLD', 'HEATING')</sql>
+
+        <createTable tableName="water_meters" schemaName="model">
+            <column name="id" type="bigint" autoIncrement="true" startWith="1" incrementBy="1">
+                <constraints nullable="false" primaryKey="true"/>
+            </column>
+            <column name="serial_number" type="varchar(100)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="type" type="type">
+                <constraints nullable="false"/>
+            </column>
+            <column name="current_value" type="numeric">
+                <constraints nullable="false"/>
+            </column>
+            <column name="owner" type="bigint">
+                <constraints nullable="false" foreignKeyName="owner_id"
+                             referencedTableSchemaName="model"
+                             referencedTableName="users"
+                             referencedColumnNames="id"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>
