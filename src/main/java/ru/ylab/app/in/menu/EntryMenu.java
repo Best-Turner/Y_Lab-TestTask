@@ -1,9 +1,10 @@
 package ru.ylab.app.in.menu;
 
+import ru.ylab.exception.InvalidDataException;
 import ru.ylab.exception.UserNotFoundException;
 import ru.ylab.model.User;
+import ru.ylab.service.UserService;
 import ru.ylab.util.AuditLogger;
-import ru.ylab.util.UserValidator;
 import ru.ylab.util.WaterCounterValidator;
 
 public class EntryMenu extends Menu {
@@ -18,13 +19,14 @@ public class EntryMenu extends Menu {
             "\n" + COMMAND_ONE + " - " + REGISTRATION + "\n"
                     + COMMAND_TWO + " - " + AUTHENTICATE + "\n"
                     + COMMAND_ZERO + " - " + CLOSE + "\n";
-    private final UserValidator validator;
     private final WaterCounterValidator waterCounterValidator;
+    private final UserService userService;
 
-    public EntryMenu(UserValidator validator, WaterCounterValidator waterCounterValidator) {
-        this.validator = validator;
+    public EntryMenu(WaterCounterValidator waterCounterValidator, UserService userService) {
         this.waterCounterValidator = waterCounterValidator;
+        this.userService = userService;
     }
+
 
     @Override
     public void start() {
@@ -42,14 +44,15 @@ public class EntryMenu extends Menu {
                 }
                 case COMMAND_TWO -> {
                     try {
-                        new UserMenu(checkCredentials(), validator, waterCounterValidator).start();
-                    } catch (UserNotFoundException e) {
+                        new UserMenu(getUserByLoginAndPassword(), userService, waterCounterValidator).start();
+                    } catch (UserNotFoundException | InvalidDataException e) {
                         System.out.println(e.getMessage());
                     }
                 }
                 case COMMAND_ZERO -> {
                     AuditLogger.log("Выход из программы");
-                    System.exit(0);}
+                    System.exit(0);
+                }
                 default -> {
                     AuditLogger.log("Неверная команда " + command);
                     System.out.println("Неверная команда. Попробуйте еще раз");
@@ -63,24 +66,28 @@ public class EntryMenu extends Menu {
         System.out.println("Регистрация нового пользователя.");
         String name = readCommand(ENTER_NAME);
         String email = readCommand(ENTER_EMAIL);
-        boolean isValid = validator.checkEmail(email);
-        if (!isValid) {
+        String password = readCommand(ENTER_PASSWORD);
+        try {
+            userService.saveUser(name, email, password);
+            AuditLogger.log("Пользователь зарегистрирован");
+            return true;
+        } catch (InvalidDataException e) {
+            System.out.println(e.getMessage());
+            AuditLogger.log("Пользователь не зарегистрирован");
             return false;
         }
-        String password = readCommand(ENTER_PASSWORD);
-        return validator.createUser(name, email, password);
     }
 
-    private User checkCredentials() throws UserNotFoundException {
+    private User getUserByLoginAndPassword() throws UserNotFoundException, InvalidDataException {
         while (true) {
             String inputEmail = readCommand(ENTER_EMAIL);
             String inputPassword = readCommand(ENTER_PASSWORD);
-            boolean register = validator.isRegister(inputEmail, inputPassword);
+            boolean register = userService.checkUserCredentials(inputEmail, inputPassword);
             if (!register) {
                 AuditLogger.log("Пользователь не зарегистрирован");
                 throw new UserNotFoundException("Попробуйте еще раз или зарегистрируйтесь");
             }
-            return validator.findUserByEmail(inputEmail);
+            return userService.getUserByEmail(inputEmail);
         }
     }
 }

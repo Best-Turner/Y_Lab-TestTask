@@ -38,28 +38,28 @@ public class UserServiceTest {
     }
 
     @Test
-    public void whenSaveUniqueUserThanSavingOccurs() {
+    public void whenSaveUniqueUserThanSavingOccurs() throws InvalidDataException {
         when(repository.isExist(EMAIL)).thenReturn(false);
         verify(repository, never()).isExist(EMAIL);
-        service.saveUser(user);
+        service.saveUser(NAME, EMAIL, PASSWORD);
         verify(repository, times(1)).isExist(EMAIL);
         verify(repository, times(1)).save(user);
     }
 
     @Test
-    public void whenSaveNonUniqueUserThanSavingNotOccur() {
+    public void whenSaveNonUniqueUserThanSavingNotOccur() throws InvalidDataException {
         when(repository.isExist(EMAIL)).thenReturn(true);
         verify(repository, never()).isExist(EMAIL);
-        service.saveUser(user);
+        service.saveUser(NAME, EMAIL, PASSWORD);
         verify(repository, times(1)).isExist(EMAIL);
         verify(repository, never()).save(user);
     }
 
     @Test
-    public void whenGetUserWhichExistThanReturnThisUser() throws UserNotFoundException {
+    public void whenGetUserWhichExistThanReturnThisUser() throws UserNotFoundException, InvalidDataException {
         when(repository.getUser(EMAIL)).thenReturn(Optional.of(user));
         verify(repository, never()).getUser(EMAIL);
-        User actualUser = service.getUser(EMAIL);
+        User actualUser = service.getUserByEmail(EMAIL);
         verify(repository, times(1)).getUser(EMAIL);
         assertEquals(user, actualUser);
     }
@@ -69,7 +69,7 @@ public class UserServiceTest {
         when(repository.getUser(EMAIL)).thenReturn(Optional.empty());
         assertThrows("User with this" + EMAIL + " is not registered",
                 UserNotFoundException.class,
-                () -> service.getUser(EMAIL));
+                () -> service.getUserByEmail(EMAIL));
     }
 
     @Test
@@ -81,24 +81,15 @@ public class UserServiceTest {
 
     }
 
-    @Test
-    public void whenUserExistThanReturnTrue() {
-        when(repository.isExist(EMAIL)).thenReturn(true);
-        verify(repository, never()).isExist(EMAIL);
-        boolean actual = service.isExist(EMAIL);
-        verify(repository, times(1)).isExist(EMAIL);
-        assertTrue(actual);
-    }
+//    @Test
+//    public void whenUserExistThanReturnTrue() {
+//        when(repository.isExist(EMAIL)).thenReturn(true);
+//        verify(repository, never()).isExist(EMAIL);
+//        boolean actual = service.isExist(EMAIL);
+//        verify(repository, times(1)).isExist(EMAIL);
+//        assertTrue(actual);
+//    }
 
-    @Test
-    public void whenDeleteExistUserReturnTrue() {
-        when(repository.getUser(EMAIL)).thenReturn(Optional.of(user));
-        when(repository.delete(user)).thenReturn(true);
-        boolean actual = service.delete(EMAIL);
-        verify(repository, times(1)).delete(user);
-        verify(repository, times(1)).getUser(EMAIL);
-        assertTrue(actual);
-    }
 
     @Test
     public void whenInputPasswordEqualsUserPasswordThanReturnTrue() throws UserNotFoundException, InvalidDataException {

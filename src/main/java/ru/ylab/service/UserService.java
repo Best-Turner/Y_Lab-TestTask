@@ -13,7 +13,7 @@ import java.util.List;
 
 public interface UserService {
 
-    void saveUser(User user);
+    void saveUser(String name, String email, String password) throws InvalidDataException;
 
     /**
      * Gets users information by their identifier.
@@ -22,27 +22,11 @@ public interface UserService {
      * @return A User object representing the user.
      */
 
-    User getUser(String email) throws UserNotFoundException;
+    User getUserByEmail(String email) throws UserNotFoundException, InvalidDataException;
+    User getUserById(String userId) throws InvalidDataException;
 
     List<User> allUsers();
 
-    void updateUser(String email, User updatedUser);
-
-    /**
-     * Delete user by their identifier.
-     *
-     * @param email User's identifier.
-     * @return A User object representing the user.
-     */
-    boolean delete(String email);
-
-    /**
-     * Check users by their identifier.
-     *
-     * @param email User's identifier.
-     * @return true if user exist..
-     */
-    boolean isExist(String email);
 
     /**
      * Check users by their credentials.
@@ -54,7 +38,6 @@ public interface UserService {
 
     boolean checkUserCredentials(String email, String password) throws UserNotFoundException, InvalidDataException;
 
-    List<WaterMeter> waterCounters(User owner);
+    List<WaterMeter> getWaterCounters(User owner);
 
-    User getUserById(long index);
 }

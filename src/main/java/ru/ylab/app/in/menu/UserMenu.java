@@ -2,8 +2,8 @@ package ru.ylab.app.in.menu;
 
 import ru.ylab.model.User;
 import ru.ylab.model.WaterMeter;
+import ru.ylab.service.UserService;
 import ru.ylab.util.AuditLogger;
-import ru.ylab.util.UserValidator;
 import ru.ylab.util.WaterCounterValidator;
 
 import java.util.HashMap;
@@ -24,13 +24,13 @@ public class UserMenu extends Menu {
                     + COMMAND_ZERO + " - " + EXIT +
                     "\n---------------------------------";
     protected final User owner;
-    protected final UserValidator userValidator;
+    protected UserService userService;
     protected final WaterCounterValidator waterCounterValidator;
     protected final Map<String, Runnable> actions = new HashMap<>();
 
-    public UserMenu(User user, UserValidator userValidator, WaterCounterValidator waterCounterValidator) {
+    public UserMenu(User user, UserService userService, WaterCounterValidator waterCounterValidator) {
         this.owner = user;
-        this.userValidator = userValidator;
+        this.userService = userService;
         this.waterCounterValidator = waterCounterValidator;
         initActions();
     }
@@ -44,7 +44,7 @@ public class UserMenu extends Menu {
     @Override
     public void start() {
         if (owner.getRole().name().equals("ADMIN")) {
-            new AdminMenu(owner, userValidator, waterCounterValidator).start();
+            new AdminMenu(owner, userService, waterCounterValidator).start();
             return;
         }
         while (true) {
@@ -84,7 +84,7 @@ public class UserMenu extends Menu {
     }
 
     protected void printAllWaterMeters(User owner) {
-        List<WaterMeter> waterCounters = userValidator.getWaterCounters(owner);
+        List<WaterMeter> waterCounters = userService.getWaterCounters(owner);
         if (waterCounters.isEmpty()) {
             System.out.println("У вас нет сохраненных счетчиков");
             return;

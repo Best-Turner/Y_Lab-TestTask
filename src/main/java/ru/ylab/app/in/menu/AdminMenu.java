@@ -3,8 +3,8 @@ package ru.ylab.app.in.menu;
 import ru.ylab.exception.InvalidDataException;
 import ru.ylab.model.User;
 import ru.ylab.model.WaterMeter;
+import ru.ylab.service.UserService;
 import ru.ylab.util.AuditLogger;
-import ru.ylab.util.UserValidator;
 import ru.ylab.util.WaterCounterValidator;
 
 import java.util.List;
@@ -25,8 +25,8 @@ public class AdminMenu extends UserMenu {
                     + COMMAND_ZERO + " - " + EXIT +
                     "\n---------------------------------";
 
-    public AdminMenu(User user, UserValidator userValidator, WaterCounterValidator waterCounterValidator) {
-        super(user, userValidator, waterCounterValidator);
+    public AdminMenu(User user, UserService userService, WaterCounterValidator waterCounterValidator) {
+        super(user, userService, waterCounterValidator);
     }
 
     @Override
@@ -44,7 +44,7 @@ public class AdminMenu extends UserMenu {
         AuditLogger.log("Получить список всех пользователей");
         StringBuilder accumAccumulateUsers = new StringBuilder();
         accumAccumulateUsers.append("Список всех зарегистрированных пользователей:");
-        userValidator.allUsers().forEach(user ->
+        userService.allUsers().forEach(user ->
                 accumAccumulateUsers.append("\n\tID пользователя - " + user.getId())
                         .append("\n\tЛогин пользователя - " + user.getEmail())
                         .append("\n~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"));
@@ -55,8 +55,8 @@ public class AdminMenu extends UserMenu {
         String inputCommand = readCommand("Ведите ID пользователя: ");
         try {
             AuditLogger.log("Получить информацию о пользователе с ID - " + inputCommand);
-            User userById = userValidator.getById(inputCommand);
-            List<WaterMeter> waterCounters = userValidator.getWaterCounters(userById);
+            User userById = userService.getUserById(inputCommand);
+            List<WaterMeter> waterCounters = userService.getWaterCounters(userById);
             System.out.println("------------------------------------------------");
             System.out.println("Подробная информация о пользователе с ID = " + userById.getId());
             System.out.println("Имя пользователя - " + userById.getName());

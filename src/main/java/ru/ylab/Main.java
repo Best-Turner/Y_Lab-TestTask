@@ -57,8 +57,8 @@ public class Main {
 
 
         UserRepository userRepository = new UserRepository(connection);
-        UserService userService = new UserServiceImpl(userRepository);
-        UserValidator userValidator = new UserValidatorImpl(userService);
+        UserValidator userValidator = new UserValidatorImpl();
+        UserService userService = new UserServiceImpl(userRepository, userValidator);
         WaterCounterRepository counterRepository = new WaterCounterRepository(connection);
 
         MeterDataRepository meterDataRepository = new MeterDataRepository(connection);
@@ -66,7 +66,7 @@ public class Main {
         WaterCounterService counterService = new WaterCounterServiceImpl(counterRepository, dataStorageService);
         WaterCounterValidator counterValidator = new WaterCounterValidatorImpl(counterService);
 
-        Menu menu = new EntryMenu(userValidator, counterValidator);
+        Menu menu = new EntryMenu(counterValidator, userService);
         menu.start();
     }
 }
